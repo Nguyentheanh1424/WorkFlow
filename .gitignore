@@ -361,3 +361,11 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Ignore appsettings files containing sensitive data
+/WorkFlow.API/appsettings.json
+/WorkFlow.API/appsettings.Development.json
+/WorkFlow.API/appsettings.json
+/WorkFlow.API/appsettings.Development.json
+/WorkFlow.API/appsettings.json
+/WorkFlow.API/appsettings.Development.json

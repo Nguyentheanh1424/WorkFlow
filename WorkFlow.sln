@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36603.0 d17.14
+VisualStudioVersion = 17.14.36603.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkFlow.API", "WorkFlow.API\WorkFlow.API.csproj", "{7CE6150C-616D-45A7-9197-2BEDCB5E5608}"
 EndProject
@@ -10,6 +10,15 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkFlow.Domain", "WorkFlow.Domain\WorkFlow.Domain.csproj", "{DA189CD0-5002-44D6-A489-4ABCD596FA2F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkFlow.Infrastructure", "WorkFlow.Infrastructure\WorkFlow.Infrastructure.csproj", "{141E7125-0568-4A8E-84F2-0F0AEB3A5BF2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "domain", "domain", "{8C256F11-09A1-46DA-920C-C7C211AECCB2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{3DA93D37-B0C1-4914-88B4-1DF27CD6F006}"
+	ProjectSection(SolutionItems) = preProject
+		Entity.md = Entity.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,6 +45,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{8C256F11-09A1-46DA-920C-C7C211AECCB2} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{3DA93D37-B0C1-4914-88B4-1DF27CD6F006} = {8C256F11-09A1-46DA-920C-C7C211AECCB2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FAEFA5CF-2474-4BA5-B613-4BE900507950}
