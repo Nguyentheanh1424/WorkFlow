@@ -43,9 +43,34 @@ namespace WorkFlow.Infrastructure.Repository
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            return _context.SaveChangesAsync(cancellationToken);
+            var now = DateTime.UtcNow;
+
+            foreach (var entry in _context.ChangeTracker.Entries<IAuditable>())
+            {
+                if (entry.State == EntityState.Added)
+                {
+                    entry.Entity.CreatedAt = now;
+                    entry.Entity.UpdatedAt = now;
+                }
+                else if (entry.State == EntityState.Modified)
+                {
+                    var hasRealChanges = entry.Properties
+                        .Any(p => p.IsModified && p.Metadata.Name != nameof(IAuditable.UpdatedAt));
+
+                    if (hasRealChanges)
+                    {
+                        entry.Entity.UpdatedAt = now;
+                    }
+                    else
+                    {
+                        entry.Property(nameof(IAuditable.UpdatedAt)).IsModified = false;
+                    }
+                }
+            }
+
+            return await _context.SaveChangesAsync(cancellationToken);
         }
 
         /// <summary>
