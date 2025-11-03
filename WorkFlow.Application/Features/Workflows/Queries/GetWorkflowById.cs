@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using MediatR;
 using WorkFlow.Application.Common.Interfaces.Repository;
-using WorkFlow.Application.Features.Workflows.Dto;
+using WorkFlow.Application.Features.Workflows.Dtos;
 using WorkFlow.Domain.Entities;
 
 namespace WorkFlow.Application.Features.Workflows.Queries

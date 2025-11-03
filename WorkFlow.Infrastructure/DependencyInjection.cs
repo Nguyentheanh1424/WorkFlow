@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using StackExchange.Redis;
 using WorkFlow.Application.Common.Interfaces.Repository;
 using WorkFlow.Application.Common.Interfaces.Services;
 using WorkFlow.Infrastructure.Persistence;
@@ -29,6 +31,45 @@ namespace WorkFlow.Infrastructure
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IFileStorageService, FileStorageService>();
             services.AddSingleton<IDateTimeService, DateTimeService>();
+
+            //Đăng ký Cache
+            var useRedis = bool.TryParse(configuration["Cache:UseRedis"], out var val) && val;
+
+            if (useRedis)
+            {
+                var redisConnectionString = configuration.GetConnectionString("Redis")
+                    ?? throw new InvalidOperationException("Redis connection string is not configured.");
+
+                var redisConfig = new ConfigurationOptions
+                {
+                    EndPoints = { redisConnectionString },
+                    User = configuration["Cache:RedisUser"],
+                    Password = configuration["Cache:RedisPassword"],
+                    AbortOnConnectFail = false,
+                    Ssl = false,
+                };
+
+                var muxer = ConnectionMultiplexer.Connect(redisConfig);
+                services.AddSingleton<IConnectionMultiplexer>(muxer);
+                //Console.WriteLine($"Redis connected: {muxer.IsConnected} | Endpoint: {redisConnectionString}");
+
+
+                services.AddScoped<ICacheService>(sp =>
+                    new RedisCacheService(
+                        sp.GetRequiredService<IConnectionMultiplexer>(),
+                        configuration
+                    ));
+            }
+            else
+            {
+                // Sử dụng Memory Cache fallback
+                services.AddMemoryCache();
+                services.AddScoped<ICacheService>(sp =>
+                    new MemoryCacheService(
+                        sp.GetRequiredService<IMemoryCache>(),
+                        sp.GetRequiredService<IConfiguration>()
+                    ));
+            }
 
             return services;
         }

@@ -1,7 +1,7 @@
 ﻿using WorkFlow.Application.Common.Mappings;
 using WorkFlow.Domain.Entities;
 
-namespace WorkFlow.Application.Features.Workflows.Dto
+namespace WorkFlow.Application.Features.Workflows.Dtos
 {
     public class CreateWorkflowDto : IMapFrom<Workflow>
     {
