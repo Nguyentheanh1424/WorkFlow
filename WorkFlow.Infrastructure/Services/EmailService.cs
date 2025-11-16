@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using System.Net;
+using System.Net.Mail;
 using WorkFlow.Application.Common.Interfaces.Services;
 
 namespace WorkFlow.Infrastructure.Services
@@ -6,17 +9,52 @@ namespace WorkFlow.Infrastructure.Services
     public class EmailService : IEmailService
     {
         private readonly ILogger<EmailService> _logger;
+        private readonly IConfiguration _configuration;
 
-        public EmailService(ILogger<EmailService> logger)
+        public EmailService(
+            ILogger<EmailService> logger,
+            IConfiguration configuration
+            )
         {
             _logger = logger;
+            _configuration = configuration;
         }
 
-        public Task SendAsync(string to, string subject, string body)
+        public async Task SendAsync(string to, string subject, string body)
         {
-            // Giả lập việc gửi email
-            _logger.LogInformation($"Email sent to {to} - Subject: {subject}");
-            return Task.CompletedTask;
+            var host = _configuration["EmailSettings:Host"];
+            var port = int.Parse(_configuration["EmailSettings:Port"]!);
+            var enableSsl = bool.Parse(_configuration["EmailSettings:EnableSsl"]!);
+            var username = _configuration["EmailSettings:UserName"];
+            var password = _configuration["EmailSettings:Password"];
+            var from = _configuration["EmailSettings:From"];
+
+            using var client = new SmtpClient(host, port)
+            {
+                Credentials = new NetworkCredential(username, password),
+                EnableSsl = enableSsl
+            };
+
+            var mail = new MailMessage
+            {
+                From = new MailAddress(from!),
+                Subject = subject,
+                Body = body,
+                IsBodyHtml = true
+            };
+
+            mail.To.Add(to);
+
+            try
+            {
+                await client.SendMailAsync(mail);
+                _logger.LogInformation($"Email sent to {to} - Subject: {subject}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "FAILED to send email");
+                throw new Exception("Failed to send email. Please try again.");
+            }
         }
     }
 }

@@ -57,5 +57,10 @@ namespace WorkFlow.Infrastructure.Repository
             }
             return Task.CompletedTask;
         }
+
+        public async Task<TEntity?> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate)
+        {
+            return await _dbSet.FirstOrDefaultAsync(predicate);
+        }
     }
 }
