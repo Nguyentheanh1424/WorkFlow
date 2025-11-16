@@ -31,6 +31,8 @@ namespace WorkFlow.Infrastructure
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IFileStorageService, FileStorageService>();
             services.AddSingleton<IDateTimeService, DateTimeService>();
+            services.AddScoped<IOtpService, OtpService>();
+
 
             //Đăng ký Cache
             var useRedis = bool.TryParse(configuration["Cache:UseRedis"], out var val) && val;

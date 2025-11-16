@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\Authentication\CacheModels\" />
+    <Folder Include="Features\Authentication\Queries\" />
   </ItemGroup>
 
 </Project>
