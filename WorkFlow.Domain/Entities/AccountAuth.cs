@@ -31,8 +31,8 @@ namespace WorkFlow.Domain.Entities
         public AccountAuth(Guid userId, string passwordHash, string salt)
         {
             UserId = userId;
-            Provider = passwordHash;
-            Provider = salt;
+            PasswordHash = passwordHash;
+            Salt = salt;
         }
 
         public void SetPassword(string hash, string salt)

@@ -24,7 +24,9 @@ namespace WorkFlow.Application.Features.Authentication.Commands
 
             RuleFor(x => x.data.Name)
                 .NotEmpty().WithMessage("Tên không được để trống.")
-                .MaximumLength(100).WithMessage("Tên workflow không được vượt quá 100 ký tự.");
+                .MaximumLength(100).WithMessage("Tên workflow không được vượt quá 100 ký tự.")
+                .Matches(@"^[\p{L}\s]+$")
+                .WithMessage("Tên workflow chỉ được chứa chữ cái và khoảng trắng.");
 
             RuleFor(x => x.data.Password)
                 .NotEmpty().WithMessage("Mật khẩu không được để trống.")

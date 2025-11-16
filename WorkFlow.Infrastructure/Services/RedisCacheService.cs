@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 using System.Text.Json;
 using WorkFlow.Application.Common.Cache;
@@ -8,6 +9,7 @@ namespace WorkFlow.Infrastructure.Services
 {
     public class RedisCacheService : ICacheService
     {
+        private readonly ILogger _logger;
         private readonly IDatabase _redis;
         private readonly IConfiguration _configuration;
         private readonly string _prefix;
@@ -39,6 +41,7 @@ namespace WorkFlow.Infrastructure.Services
             if (!json.HasValue)
                 return default;
 
+            Console.WriteLine($"[CACHE-DEBUG] Raw JSON for key '{cacheKey}': {json}");
             var model = JsonSerializer.Deserialize<T>(json!)!;
             if (model == null)
                 return default;
