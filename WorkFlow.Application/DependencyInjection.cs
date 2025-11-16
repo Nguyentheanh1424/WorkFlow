@@ -3,6 +3,8 @@ using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using WorkFlow.Application.Common.Behaviors;
+using WorkFlow.Application.Common.Interfaces.Services;
+
 
 namespace WorkFlow.Application
 {
@@ -28,7 +30,7 @@ namespace WorkFlow.Application
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(PerformanceBehavior<,>));
-
+            services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
             return services;
         }
     }

@@ -2,6 +2,7 @@ using WorkFlow.Application;
 using WorkFlow.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
+Console.WriteLine("Connection string: " + builder.Configuration.GetConnectionString("DefaultConnection"));
 
 // Add services to the container.
 builder.Services.AddApplication();
