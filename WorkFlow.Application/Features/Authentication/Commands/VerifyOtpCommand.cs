@@ -9,8 +9,7 @@ using WorkFlow.Domain.Entities;
 
 namespace WorkFlow.Application.Features.Authentication.Commands
 {
-    public record class VerifyRegisterOtpCommand(
-        VerifyRegisterOtpCommandDto data) : IRequest<Result<string>>;
+    public record class VerifyRegisterOtpCommand(VerifyRegisterOtpCommandDto data) : IRequest<Result<string>>;
 
     public class VerifyRegisterOtpCommandValidator : AbstractValidator<VerifyRegisterOtpCommand>
     {
