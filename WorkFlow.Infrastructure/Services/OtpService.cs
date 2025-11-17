@@ -7,18 +7,26 @@ namespace WorkFlow.Infrastructure.Services
     public class OtpService : IOtpService
     {
         private readonly ICacheService _cache;
+        private readonly TimeSpan AttemptTtl = TimeSpan.FromMinutes(10);
+        private readonly TimeSpan Cooldown = TimeSpan.FromSeconds(30);
+        private const int MaxAttempts = 5;
+
 
         public OtpService(ICacheService cache)
         {
             _cache = cache;
         }
 
-        private static string BuildCacheKey(string key)
+        private static string BuildOtpCacheKey(string key)
             => $"otp:{key}";
+
+        private static string BuildOtpAttemptCacheKey(string key)
+            => $"otp-attempt:{key}";
 
         public async Task<string> GenerateAsync(string key, int length = 6)
         {
-            var otp = OtpGenerator.GenerateNumeric(length);
+            //var otp = OtpGenerator.GenerateNumeric(length);
+            var otp = OtpGenerator.GenerateAlphaNumeric(length);
 
             // TTL OTP 2 phút
             var ttl = TimeSpan.FromMinutes(2);
@@ -30,9 +38,57 @@ namespace WorkFlow.Infrastructure.Services
             return otp;
         }
 
+        private async Task<OtpAttemptCacheModel> GetOrCreateAttemptAsync(string key)
+        {
+            var cacheKey = BuildOtpAttemptCacheKey(key);
+
+            var model = await _cache.GetAsync<OtpAttemptCacheModel>(cacheKey);
+
+            if (model == null)
+            {
+                return new OtpAttemptCacheModel(
+                    email: cacheKey,
+                    attemptCount: 0,
+                    nextAvailableAt: DateTime.MinValue,
+                    ttl: AttemptTtl
+                    );
+            }
+
+            return model;
+        }
+
+        public async Task ValidateOtpRequestAsync(string key)
+        {
+            var attempt = await GetOrCreateAttemptAsync(key);
+
+            // Kiểm tra cooldown
+            if (DateTime.UtcNow < attempt.NextAvailableAt)
+            {
+                var remain = (attempt.NextAvailableAt - DateTime.UtcNow).TotalSeconds;
+                throw new Exception($"Bạn phải chờ thêm {Math.Ceiling(remain)} giây trước khi gửi OTP tiếp.");
+            }
+
+            // Kiểm tra limit
+            if (attempt.AttemptCount >= MaxAttempts)
+            {
+                throw new Exception("Bạn đã yêu cầu OTP quá nhiều lần. Hãy thử lại sau 10 phút.");
+            }
+        }
+
+        public async Task MarkOtpSentAsync(string key)
+        {
+            var attempt = await GetOrCreateAttemptAsync(key);
+
+            // Tăng attempt và set cooldown
+            attempt.Increase();
+            attempt.SetCooldown(Cooldown);
+
+            await _cache.SetAsync(attempt, absoluteTtl: AttemptTtl);
+        }
+
         public async Task<bool> VerifyAsync(string key, string otp)
         {
-            var cacheKey = BuildCacheKey(key);
+            var cacheKey = BuildOtpCacheKey(key);
 
             var model = await _cache.GetAsync<OtpCacheModel>(cacheKey);
             if (model == null)

@@ -1,0 +1,77 @@
+﻿using FluentValidation;
+using MediatR;
+using WorkFlow.Application.Common.Cache;
+using WorkFlow.Application.Common.Interfaces.Repository;
+using WorkFlow.Application.Common.Interfaces.Services;
+using WorkFlow.Domain.Common;
+using WorkFlow.Domain.Entities;
+
+namespace WorkFlow.Application.Features.Authentication.Commands
+{
+    public record class ResendOtpCommand(string email) : IRequest<Result<string>>;
+
+    public class ResendOtpCommandValidator : AbstractValidator<ResendOtpCommand>
+    {
+        public ResendOtpCommandValidator()
+        {
+            RuleFor(x => x.email)
+                .NotEmpty().WithMessage("Email không được để trống.")
+                .EmailAddress().WithMessage("Email không hợp lệ.")
+                .Must(email => email.EndsWith("@gmail.com"))
+                .WithMessage("Email phải thuộc domain hợp lệ.");
+        }
+    }
+
+    public class ResendOtpCommandHandler : IRequestHandler<ResendOtpCommand, Result<string>>
+    {
+        private readonly IOtpService _otpService;
+        private readonly IEmailService _emailService;
+        private readonly ICacheService _cacheService;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IRepository<User, Guid> _userRepository;
+
+        public ResendOtpCommandHandler(
+            IOtpService otpService,
+            IEmailService emailService,
+            ICacheService cacheService,
+            IUnitOfWork unitOfWork)
+        {
+            _otpService = otpService;
+            _emailService = emailService;
+            _cacheService = cacheService;
+            _unitOfWork = unitOfWork;
+            _userRepository = _unitOfWork.GetRepository<User, Guid>();
+        }
+
+        public async Task<Result<string>> Handle(ResendOtpCommand request, CancellationToken cancellationToken)
+        {
+            var email = request.email.Trim().ToLower();
+
+            bool userExists = await _userRepository.AnyAsync(u => u.Email == email);
+            if (userExists)
+                return Result<string>.Failure(
+                    "Gửi lại OTP không thành công. Email này đã được sử dụng.");
+
+            var cacheKey = $"pending-user:{email}";
+            var pendingUser = await _cacheService.GetAsync<PendingUserCacheModel>(cacheKey);
+
+            if (pendingUser == null)
+                return Result<string>.Failure(
+                    "Gửi lại OTP không thành công. Thông tin đăng ký không tồn tại hoặc đã hết hạn. Vui lòng đăng ký lại.");
+
+            await _otpService.ValidateOtpRequestAsync(email);
+
+            var otp = await _otpService.GenerateAsync(email);
+
+            await _otpService.MarkOtpSentAsync(email);
+
+            await _emailService.SendAsync(
+                email,
+                "Xác thực tài khoản",
+                $"<p>Mã OTP của bạn là: <strong>{otp}</strong></p>"
+            );
+
+            return Result<string>.Success("Gửi lại OTP thành công. Vui lòng kiểm tra email để xác thực OTP");
+        }
+    }
+}

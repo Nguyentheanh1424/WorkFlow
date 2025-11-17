@@ -62,15 +62,19 @@ namespace WorkFlow.Application.Features.Authentication.Commands
 
         public async Task<Result<string>> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
         {
-            bool userExists = await _userRepository.AnyAsync(u => u.Email == request.data.Email);
+            var email = request.data.Email.Trim().ToLower();
+
+            bool userExists = await _userRepository.AnyAsync(u => u.Email == email);
             if (userExists)
                 return Result<string>.Failure(
                     "Email này đã được sử dụng.");
 
+            await _otpService.ValidateOtpRequestAsync(email);
+
             var (hash, salt) = PasswordHasher.Hash(request.data.Password);
 
             var pendingUser = new PendingUserCacheModel(
-                email: request.data.Email,
+                email: email,
                 passwordHash: hash,
                 salt: salt,
                 name: request.data.Name,
@@ -78,10 +82,12 @@ namespace WorkFlow.Application.Features.Authentication.Commands
 
             await _cacheService.SetAsync(pendingUser);
 
-            var otp = await _otpService.GenerateAsync(request.data.Email);
+            var otp = await _otpService.GenerateAsync(email);
+
+            await _otpService.MarkOtpSentAsync(email);
 
             await _emailService.SendAsync(
-                request.data.Email,
+                email,
                 "Xác thực tài khoản",
                 $"<p>Mã OTP của bạn là: <strong>{otp}</strong></p>"
             );

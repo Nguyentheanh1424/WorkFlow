@@ -32,5 +32,14 @@ namespace WorkFlow.API.Controllers
                 ? Ok(result)
                 : BadRequest(result);
         }
+
+        [HttpPost("resend-register-otp")]
+        public async Task<IActionResult> ResendOtp([FromBody] ResendOtpCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return result.IsSuccess
+                ? Ok(result)
+                : BadRequest(result);
+        }
     }
 }
