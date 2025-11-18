@@ -8,8 +8,8 @@ namespace WorkFlow.Domain.Entities
         public Guid UserId { get; private set; } = default!;
 
         // Login provinder
-        public string Provider { get; private set; } = "local";
-        public string ProvinderUid { get; private set; } = string.Empty;
+        public string Provider { get; private set; } = EnumExtensions.GetName(AccountProvider.Local);
+        public string ProviderUid { get; private set; } = string.Empty;
 
         // Password auth
         public string PasswordHash { get; private set; } = string.Empty;
@@ -19,7 +19,7 @@ namespace WorkFlow.Domain.Entities
         public AccountStatus Status { get; private set; } = AccountStatus.Actived;
 
         // Refresh token
-        public string RefreshTokenHash { get; private set; } = string.Empty;
+        public string RefreshToken { get; private set; } = string.Empty;
         public DateTime? RefreshTokenExpireAt { get; private set; }
 
         // Login security
@@ -28,11 +28,26 @@ namespace WorkFlow.Domain.Entities
         public int LoginAttempt { get; private set; } = 0;
         public DateTime? LockedUntil { get; private set; }
 
-        public AccountAuth(Guid userId, string passwordHash, string salt)
+        protected AccountAuth() { }
+
+        public static AccountAuth CreateLocal(Guid userId, string passwordHash, string salt)
         {
-            UserId = userId;
-            PasswordHash = passwordHash;
-            Salt = salt;
+            return new AccountAuth
+            {
+                UserId = userId,
+                PasswordHash = passwordHash,
+                Salt = salt,
+            };
+        }
+
+        public static AccountAuth CreateOAuth(Guid userId, string provider, string providerUid)
+        {
+            return new AccountAuth
+            {
+                UserId = userId,
+                Provider = provider,
+                ProviderUid = providerUid,
+            };
         }
 
         public void SetPassword(string hash, string salt)
@@ -42,10 +57,16 @@ namespace WorkFlow.Domain.Entities
             LastPasswordChangeAt = DateTime.UtcNow;
         }
 
-        public void SetRefreshToken(string refreshToken, DateTime expire)
+        public void SetRefreshToken(string refreshToken, int days)
         {
-            RefreshTokenHash = refreshToken;
-            RefreshTokenExpireAt = expire;
+            RefreshToken = refreshToken;
+            RefreshTokenExpireAt = DateTime.UtcNow.AddDays(days);
+        }
+
+        public void RevokeRefreshToken()
+        {
+            RefreshToken = string.Empty;
+            RefreshTokenExpireAt = null;
         }
 
         public void MarkLoginSuccess()
@@ -68,6 +89,11 @@ namespace WorkFlow.Domain.Entities
         public bool IsLocked()
         {
             return LockedUntil.HasValue && DateTime.UtcNow < LockedUntil.Value;
+        }
+
+        public void SetStatus(AccountStatus status)
+        {
+            Status = status;
         }
     }
 }

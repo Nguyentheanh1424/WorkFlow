@@ -39,7 +39,7 @@ namespace WorkFlow.Infrastructure.Services
             if (!json.HasValue)
                 return default;
 
-            Console.WriteLine($"[CACHE-DEBUG] Raw JSON for key '{cacheKey}': {json}");
+            //Console.WriteLine($"[CACHE-DEBUG] Raw JSON for key '{cacheKey}': {json}");
             var model = JsonSerializer.Deserialize<T>(json!)!;
             if (model == null)
                 return default;

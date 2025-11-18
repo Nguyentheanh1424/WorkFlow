@@ -9,7 +9,7 @@ using WorkFlow.Domain.Entities;
 
 namespace WorkFlow.Application.Features.Authentication.Commands
 {
-    public record class VerifyRegisterOtpCommand(VerifyRegisterOtpCommandDto data) : IRequest<Result<string>>;
+    public record class VerifyRegisterOtpCommand(VerifyRegisterOtpDto data) : IRequest<Result<string>>;
 
     public class VerifyRegisterOtpCommandValidator : AbstractValidator<VerifyRegisterOtpCommand>
     {
@@ -70,7 +70,7 @@ namespace WorkFlow.Application.Features.Authentication.Commands
 
             var userId = await _userRepository.AddAsync(user);
 
-            var auth = new AccountAuth(
+            var auth = AccountAuth.CreateLocal(
                 userId: userId,
                 passwordHash: pendingUser.PasswordHash,
                 salt: pendingUser.Salt

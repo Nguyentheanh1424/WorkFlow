@@ -1,6 +1,6 @@
 ﻿namespace WorkFlow.Application.Features.Authentication.Dtos
 {
-    public class RegisterUserCommandDto
+    public class RegisterUserDto
     {
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;

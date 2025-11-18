@@ -33,6 +33,8 @@ namespace WorkFlow.Infrastructure
             services.AddScoped<IFileStorageService, FileStorageService>();
             services.AddSingleton<IDateTimeService, DateTimeService>();
             services.AddScoped<IOtpService, OtpService>();
+            services.AddHttpClient<IOAuthVerifier, OAuthVerifier>();
+            services.AddScoped<ITokenService, JwtTokenService>();
 
 
             //Đăng ký Cache

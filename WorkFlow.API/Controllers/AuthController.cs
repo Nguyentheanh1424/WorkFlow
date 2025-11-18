@@ -15,7 +15,7 @@ namespace WorkFlow.API.Controllers
             _mediator = mediator;
         }
 
-        [HttpPost("register")]
+        [HttpPost("Register")]
         public async Task<IActionResult> Register([FromBody] RegisterUserCommand command)
         {
             var result = await _mediator.Send(command);
@@ -24,7 +24,7 @@ namespace WorkFlow.API.Controllers
                 : BadRequest(result);
         }
 
-        [HttpPost("verify-register-otp")]
+        [HttpPost("VerifyRegisterOtp")]
         public async Task<IActionResult> VerifyOtp([FromBody] VerifyRegisterOtpCommand command)
         {
             var result = await _mediator.Send(command);
@@ -33,8 +33,35 @@ namespace WorkFlow.API.Controllers
                 : BadRequest(result);
         }
 
-        [HttpPost("resend-register-otp")]
+        [HttpPost("ResendRegisterOtp")]
         public async Task<IActionResult> ResendOtp([FromBody] ResendOtpCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return result.IsSuccess
+                ? Ok(result)
+                : BadRequest(result);
+        }
+
+        [HttpPost("Login")]
+        public async Task<IActionResult> Login([FromBody] LoginCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return result.IsSuccess
+                ? Ok(result)
+                : BadRequest(result);
+        }
+
+        [HttpPost("RefreshToken")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return result.IsSuccess
+                ? Ok(result)
+                : BadRequest(result);
+        }
+
+        [HttpPost("Logout")]
+        public async Task<IActionResult> Logout([FromBody] LogoutCommand command)
         {
             var result = await _mediator.Send(command);
             return result.IsSuccess

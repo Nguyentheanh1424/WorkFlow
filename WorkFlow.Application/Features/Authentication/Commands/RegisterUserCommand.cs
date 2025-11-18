@@ -10,7 +10,7 @@ using WorkFlow.Domain.Entities;
 
 namespace WorkFlow.Application.Features.Authentication.Commands
 {
-    public record RegisterUserCommand(RegisterUserCommandDto data) : IRequest<Result<string>>;
+    public record RegisterUserCommand(RegisterUserDto data) : IRequest<Result<string>>;
 
     public class RegisterUserCommandValidator : AbstractValidator<RegisterUserCommand>
     {

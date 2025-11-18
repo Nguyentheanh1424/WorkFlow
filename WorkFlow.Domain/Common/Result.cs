@@ -32,6 +32,11 @@
         {
             return new Result<T>(true, value, string.Empty);
         }
+
+        public static Result<T> Success(T value, string message)
+        {
+            return new Result<T>(true, default, message);
+        }
         public static Result<T> Failure(string errorMessage)
         {
             return new Result<T>(false, default, errorMessage);
