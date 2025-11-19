@@ -1,0 +1,197 @@
+{
+  "info": {
+    "name": "WorkFlow API - Tests",
+    "_postman_id": "c5f8a9d0-0000-4000-8000-000000000001",
+    "description": "Postman collection for WorkFlow.API (Auth, Workflows, WeatherForecast)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "WorkFlow.API_HostAddress",
+      "value": "http://localhost:5174"
+    },
+    {
+      "key": "WORKFLOW_ID",
+      "value": ""
+    },
+    {
+      "key": "REFRESH_TOKEN",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "WeatherForecast",
+      "item": [
+        {
+          "name": "Get WeatherForecast",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{WorkFlow.API_HostAddress}}/weatherforecast",
+              "host": ["{{WorkFlow.API_HostAddress}}"],
+              "path": ["weatherforecast"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response is an array', function () { var json = pm.response.json(); pm.expect(Array.isArray(json)).to.be.true; });",
+                  "pm.test('Has at least one item', function () { var json = pm.response.json(); pm.expect(json.length).to.be.greaterThan(0); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"data\": {\n    \"email\": \"testuser@gmail.com\",\n    \"password\": \"P@ssw0rd!\",\n    \"name\": \"Nguyen Test\"\n  }\n}"
+            },
+            "url": { "raw": "{{WorkFlow.API_HostAddress}}/Auth/Register", "host": ["{{WorkFlow.API_HostAddress}}"], "path": ["Auth","Register"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 or 400', function () { pm.expect(pm.response.code).to.be.oneOf([200,400]); });",
+                  "pm.test('Has JSON body', function () { pm.response.to.have.header('Content-Type'); pm.response.to.be.json; });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "VerifyRegisterOtp",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"data\": {\n    \"email\": \"testuser@gmail.com\",\n    \"otp\": \"123456\"\n  }\n}" },
+            "url": { "raw": "{{WorkFlow.API_HostAddress}}/Auth/VerifyRegisterOtp", "host": ["{{WorkFlow.API_HostAddress}}"], "path": ["Auth","VerifyRegisterOtp"] }
+          },
+          "event": [ { "listen": "test", "script": { "exec": [ "pm.test('Status code is 200 or 400', function () { pm.expect(pm.response.code).to.be.oneOf([200,400]); });" ], "type": "text/javascript" } } ]
+        },
+        {
+          "name": "ResendRegisterOtp",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"testuser@gmail.com\"\n}" },
+            "url": { "raw": "{{WorkFlow.API_HostAddress}}/Auth/ResendRegisterOtp", "host": ["{{WorkFlow.API_HostAddress}}"], "path": ["Auth","ResendRegisterOtp"] }
+          },
+          "event": [ { "listen": "test", "script": { "exec": [ "pm.test('Status code is 200 or 400', function () { pm.expect(pm.response.code).to.be.oneOf([200,400]); });" ], "type": "text/javascript" } } ]
+        },
+        {
+          "name": "Login (local)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"type\": \"email\",\n  \"email\": \"testuser@gmail.com\",\n  \"password\": \"P@ssw0rd!\"\n}" },
+            "url": { "raw": "{{WorkFlow.API_HostAddress}}/Auth/Login", "host": ["{{WorkFlow.API_HostAddress}}"], "path": ["Auth","Login"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 or 400', function () { pm.expect(pm.response.code).to.be.oneOf([200,400]); });",
+                  "var json = pm.response.json();",
+                  "if (pm.response.code === 200 && json.data) { pm.environment.set('REFRESH_TOKEN', json.data.refreshToken || json.data.RefreshToken || ''); }",
+                  "pm.test('If OK then has accessToken', function () { if (pm.response.code === 200) { pm.expect(json.data.accessToken || json.data.AccessToken).to.exist; } else { pm.expect(json).to.be.ok; } });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "RefreshToken",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"refreshToken\": \"{{REFRESH_TOKEN}}\"\n}" },
+            "url": { "raw": "{{WorkFlow.API_HostAddress}}/Auth/RefreshToken", "host": ["{{WorkFlow.API_HostAddress}}"], "path": ["Auth","RefreshToken"] }
+          },
+          "event": [ { "listen": "test", "script": { "exec": [ "pm.test('Status code is 200 or 400', function () { pm.expect(pm.response.code).to.be.oneOf([200,400]); });" ], "type": "text/javascript" } } ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"provider\": \"Local\",\n  \"refreshToken\": \"{{REFRESH_TOKEN}}\"\n}" },
+            "url": { "raw": "{{WorkFlow.API_HostAddress}}/Auth/Logout", "host": ["{{WorkFlow.API_HostAddress}}"], "path": ["Auth","Logout"] }
+          },
+          "event": [ { "listen": "test", "script": { "exec": [ "pm.test('Status code is 200 or 400', function () { pm.expect(pm.response.code).to.be.oneOf([200,400]); });" ], "type": "text/javascript" } } ]
+        }
+      ]
+    },
+    {
+      "name": "Workflows",
+      "item": [
+        {
+          "name": "Create Workflow",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"My Test Workflow\",\n  \"description\": \"A sample workflow created by API test\"\n}" },
+            "url": { "raw": "{{WorkFlow.API_HostAddress}}/api/Workflows", "host": ["{{WorkFlow.API_HostAddress}}"], "path": ["api","Workflows"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Has Id field', function () { pm.expect(json.Id || json.id).to.exist; });",
+                  "if (json.Id) { pm.environment.set('WORKFLOW_ID', json.Id); } else if (json.id) { pm.environment.set('WORKFLOW_ID', json.id); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Workflow By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{WorkFlow.API_HostAddress}}/api/Workflows/{{WORKFLOW_ID}}", "host": ["{{WorkFlow.API_HostAddress}}"], "path": ["api","Workflows","{{WORKFLOW_ID}}"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response has id/name/description', function () { var json = pm.response.json(); pm.expect(json).to.have.property('id') || pm.expect(json).to.have.property('Id'); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

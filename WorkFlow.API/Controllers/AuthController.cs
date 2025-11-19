@@ -1,11 +1,13 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using WorkFlow.Application.Features.Authentication.Commands;
 
 namespace WorkFlow.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [Authorize]
     public class AuthController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -16,6 +18,7 @@ namespace WorkFlow.API.Controllers
         }
 
         [HttpPost("Register")]
+         [AllowAnonymous]
         public async Task<IActionResult> Register([FromBody] RegisterUserCommand command)
         {
             var result = await _mediator.Send(command);
@@ -25,6 +28,7 @@ namespace WorkFlow.API.Controllers
         }
 
         [HttpPost("VerifyRegisterOtp")]
+        [AllowAnonymous]
         public async Task<IActionResult> VerifyOtp([FromBody] VerifyRegisterOtpCommand command)
         {
             var result = await _mediator.Send(command);
@@ -34,6 +38,7 @@ namespace WorkFlow.API.Controllers
         }
 
         [HttpPost("ResendRegisterOtp")]
+        [AllowAnonymous]
         public async Task<IActionResult> ResendOtp([FromBody] ResendOtpCommand command)
         {
             var result = await _mediator.Send(command);
@@ -43,6 +48,7 @@ namespace WorkFlow.API.Controllers
         }
 
         [HttpPost("Login")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginCommand command)
         {
             var result = await _mediator.Send(command);

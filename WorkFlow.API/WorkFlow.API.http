@@ -1,6 +1,108 @@
 @WorkFlow.API_HostAddress = http://localhost:5174
 
+### WeatherForecast
 GET {{WorkFlow.API_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+### Auth - Register (creates a pending user and sends OTP to email)
+POST {{WorkFlow.API_HostAddress}}/Auth/Register
+Content-Type: application/json
+
+{
+	"data": {
+		"email": "testuser@gmail.com",
+		"password": "P@ssw0rd!",
+		"name": "Nguyen Test"
+	}
+}
+
+###
+
+### Auth - VerifyRegisterOtp (use OTP received by email)
+POST {{WorkFlow.API_HostAddress}}/Auth/VerifyRegisterOtp
+Content-Type: application/json
+
+{
+	"data": {
+		"email": "testuser@gmail.com",
+		"otp": "123456"
+	}
+}
+
+###
+
+### Auth - ResendRegisterOtp
+POST {{WorkFlow.API_HostAddress}}/Auth/ResendRegisterOtp
+Content-Type: application/json
+
+{
+	"email": "testuser@gmail.com"
+}
+
+###
+
+### Auth - Login (local)
+POST {{WorkFlow.API_HostAddress}}/Auth/Login
+Content-Type: application/json
+
+{
+	"type": "email",
+	"email": "testuser@gmail.com",
+	"password": "P@ssw0rd!"
+}
+
+###
+
+### Auth - RefreshToken
+POST {{WorkFlow.API_HostAddress}}/Auth/RefreshToken
+Content-Type: application/json
+
+{
+	"refreshToken": "<REFRESH_TOKEN_HERE>"
+}
+
+###
+
+### Auth - Logout
+POST {{WorkFlow.API_HostAddress}}/Auth/Logout
+Content-Type: application/json
+
+{
+	"provider": "Local",
+	"refreshToken": "<REFRESH_TOKEN_HERE>"
+}
+
+###
+
+### Workflows - Create
+POST {{WorkFlow.API_HostAddress}}/api/Workflows
+Content-Type: application/json
+
+{
+	"name": "My Test Workflow",
+	"description": "A sample workflow created by API test"
+}
+
+###
+
+### Workflows - Get By Id
+GET {{WorkFlow.API_HostAddress}}/api/Workflows/{{WORKFLOW_ID}}
+Accept: application/json
+
+###
+
+### Notes
+- OTP: the app sends OTP via the configured `IEmailService`. For end-to-end testing you must obtain the OTP from the email sink or mock the OTP service.
+- Replace `{{WorkFlow.API_HostAddress}}` and placeholders (`<REFRESH_TOKEN_HERE>`, `{{WORKFLOW_ID}}`) before sending requests.
+
+### Curl / PowerShell examples
+# curl (Windows WSL or Git Bash)
+curl -X POST "{{WorkFlow.API_HostAddress}}/Auth/Login" \
+	-H "Content-Type: application/json" \
+	-d '{"type":"email","email":"testuser@gmail.com","password":"P@ssw0rd!"}'
+
+# PowerShell (Windows PowerShell)
+Invoke-RestMethod -Method Post -Uri "{{WorkFlow.API_HostAddress}}/Auth/Login" -ContentType "application/json" -Body (@{ type = 'email'; email = 'testuser@gmail.com'; password = 'P@ssw0rd!' } | ConvertTo-Json)
+
