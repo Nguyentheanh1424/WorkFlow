@@ -2,6 +2,7 @@
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using WorkFlow.API.Middleware;
 using WorkFlow.Application;
 using WorkFlow.Infrastructure;
 
@@ -89,6 +90,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseMiddleware<ErrorHandling>();
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -2,13 +2,13 @@
 {
     public class OtpAttemptCacheModel : CacheModelBase
     {
-        public int AttemptCount { get; private set; }
-        public DateTime NextAvailableAt { get; private set; }
+        public int AttemptCount { get; set; } = 0;
+        public DateTime NextAvailableAt { get; set; } = DateTime.MinValue;
 
-        public OtpAttemptCacheModel() : base("") { }
+        public OtpAttemptCacheModel() { }
 
-        public OtpAttemptCacheModel(string email, int attemptCount, DateTime nextAvailableAt, TimeSpan ttl)
-            : base($"otp-attempt:{email}", absoluteTtl: ttl)
+        public OtpAttemptCacheModel(int attemptCount, DateTime nextAvailableAt, string key, TimeSpan ttl)
+            : base($"otp-attempt:{key}", absoluteTtl: ttl)
         {
             AttemptCount = attemptCount;
             NextAvailableAt = nextAvailableAt;

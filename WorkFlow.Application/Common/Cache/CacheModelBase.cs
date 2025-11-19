@@ -18,6 +18,11 @@
         /// </summary>
         public DateTime? SlidingExpiresAt { get; protected set; }
 
+        /// <summary>
+        /// Hàm khởi tạo dành cho Json deserialize
+        /// </summary>
+        protected CacheModelBase() { }
+
         protected CacheModelBase(string cacheKey, TimeSpan? absoluteTtl = null, TimeSpan? slidingTtl = null)
         {
             CacheKey = cacheKey;

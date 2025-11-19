@@ -47,7 +47,7 @@ namespace WorkFlow.Infrastructure.Services
             if (model == null)
             {
                 return new OtpAttemptCacheModel(
-                    email: cacheKey,
+                    key: key,
                     attemptCount: 0,
                     nextAvailableAt: DateTime.MinValue,
                     ttl: AttemptTtl
@@ -73,6 +73,8 @@ namespace WorkFlow.Infrastructure.Services
             {
                 throw new Exception("Bạn đã yêu cầu OTP quá nhiều lần. Hãy thử lại sau 10 phút.");
             }
+
+
         }
 
         public async Task MarkOtpSentAsync(string key)
