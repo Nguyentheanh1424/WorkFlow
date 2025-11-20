@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using MediatR;
+using WorkFlow.Application.Common.Exceptions;
 using WorkFlow.Application.Common.Interfaces.Repository;
 using WorkFlow.Application.Features.Workflows.Dtos;
 using WorkFlow.Domain.Entities;
@@ -22,7 +23,7 @@ namespace WorkFlow.Application.Features.Workflows.Queries
         public async Task<WorkflowDto> Handle(GetWorkflowByIdQuery request, CancellationToken cancellationToken)
         {
             var entity = await _workflowRepository.GetByIdAsync(request.Id)
-                ?? throw new KeyNotFoundException($"Workflow with Id {request.Id} not found.");
+                ?? throw new NotFoundException($"Workflow with Id {request.Id} not found.");
 
             return _mapper.Map<WorkflowDto>(entity);
         }

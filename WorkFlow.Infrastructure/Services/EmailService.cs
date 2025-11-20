@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Net.Mail;
+using WorkFlow.Application.Common.Exceptions;
 using WorkFlow.Application.Common.Interfaces.Services;
 
 namespace WorkFlow.Infrastructure.Services
@@ -53,7 +54,7 @@ namespace WorkFlow.Infrastructure.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "FAILED to send email");
-                throw new Exception("Failed to send email. Please try again.");
+                throw new AppException("Failed to send email. Please try again.");
             }
         }
     }

@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using WorkFlow.Application.Common.Exceptions;
 using WorkFlow.Application.Common.Interfaces.Repository;
 using WorkFlow.Application.Common.Interfaces.Services;
 using WorkFlow.Domain.Common;
@@ -31,7 +32,7 @@ namespace WorkFlow.Application.Features.Authentication.Commands
             var auth = await _authRepository.FirstOrDefaultAsync(a =>
                 a.Provider == request.Provider &&
                 a.RefreshToken == request.RefreshToken)
-                ?? throw new Exception("Token không hợp lệ");
+                ?? throw new UnauthorizedException("Token không hợp lệ");
 
             auth.RevokeRefreshToken();
             await _authRepository.UpdateAsync(auth);

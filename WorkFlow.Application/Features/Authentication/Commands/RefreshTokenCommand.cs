@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Configuration;
+using WorkFlow.Application.Common.Exceptions;
 using WorkFlow.Application.Common.Interfaces.Repository;
 using WorkFlow.Application.Common.Interfaces.Services;
 using WorkFlow.Application.Features.Authentication.Dtos;
@@ -34,10 +35,10 @@ namespace WorkFlow.Application.Features.Authentication.Commands
         {
             var auth = await _authRepository.FirstOrDefaultAsync(a =>
                 a.RefreshToken == request.RefreshToken)
-                ?? throw new Exception("Refresh token không hợp lệ");
+                ?? throw new UnauthorizedException("Refresh token không hợp lệ");
 
             if (auth.RefreshTokenExpireAt < DateTime.UtcNow)
-                throw new Exception("Refresh token đã hết hạn");
+                throw new UnauthorizedException("Refresh token đã hết hạn");
 
             var (newAccessToken, newRefreshToken) = await _tokenService.IssueAsync(auth.UserId, EnumExtensions.ParseEnum<AccountProvider>(auth.Provider));
 

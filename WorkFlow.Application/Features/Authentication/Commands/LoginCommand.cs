@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Configuration;
+using WorkFlow.Application.Common.Exceptions;
 using WorkFlow.Application.Common.Interfaces.Repository;
 using WorkFlow.Application.Common.Interfaces.Services;
 using WorkFlow.Application.Features.Authentication.Dtos;
@@ -55,13 +56,13 @@ namespace WorkFlow.Application.Features.Authentication.Commands
         private async Task<Result<LoginResultDto>> HandleLocalLogin(LoginCommand request, CancellationToken cancellationToken)
         {
             var user = await _userRepository.FirstOrDefaultAsync(u => u.Email == request.Email)
-                ?? throw new Exception("Email chưa được đăng ký người dùng.");
+                ?? throw new NotFoundException("Email chưa được đăng ký người dùng.");
 
             var auth = await _authRepository.FirstOrDefaultAsync(a => a.UserId == user.Id && a.Provider == EnumExtensions.GetName(AccountProvider.Local))
-                ?? throw new Exception("Tài khoản chưa thiết lập phương thức đăng nhập này.");
+                ?? throw new AppException("Tài khoản chưa thiết lập phương thức đăng nhập này.");
 
             if (auth.IsLocked())
-                throw new Exception("Tài khoản bị khóa, vui lòng liên hệ quản trị viên theo số điện thoại 0966963030 để được hỗ trợ.");
+                throw new ForbiddenAccessException("Tài khoản bị khóa, vui lòng liên hệ quản trị viên theo số điện thoại 0966963030 để được hỗ trợ.");
 
             var isLoginValid = PasswordHasher.Verify(request.Password!, auth.PasswordHash!, auth.Salt!);
             if (!isLoginValid)
@@ -69,7 +70,7 @@ namespace WorkFlow.Application.Features.Authentication.Commands
                 auth.MarkLoginFailed();
                 await _authRepository.UpdateAsync(auth);
                 await _uow.SaveChangesAsync(cancellationToken);
-                throw new Exception("Mật khẩu không đúng, vui lòng thử lại.");
+                throw new UnauthorizedException("Mật khẩu không đúng, vui lòng thử lại.");
             }
 
             auth.MarkLoginSuccess();
@@ -108,7 +109,7 @@ namespace WorkFlow.Application.Features.Authentication.Commands
         private async Task<Result<LoginResultDto>> HandleOAuth(OAuthProfileDto profile, AccountProvider provider)
         {
             var auth = await _authRepository.FirstOrDefaultAsync(a => a.ProviderUid == profile.Uid && a.Provider == EnumExtensions.GetName(provider))
-                ?? throw new Exception("Chưa tạo tài khoản hoặc chưa kết nối phương thức đăng nhập");
+                ?? throw new NotFoundException("Chưa tạo tài khoản hoặc chưa kết nối phương thức đăng nhập");
 
             var (accessToken, refreshToken) = await _tokenService.IssueAsync(auth.UserId, provider);
 

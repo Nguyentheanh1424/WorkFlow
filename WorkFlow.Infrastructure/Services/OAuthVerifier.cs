@@ -1,6 +1,7 @@
 ﻿using Google.Apis.Auth;
 using Microsoft.Extensions.Configuration;
 using System.Net.Http.Json;
+using WorkFlow.Application.Common.Exceptions;
 using WorkFlow.Application.Common.Interfaces.Services;
 
 namespace WorkFlow.Infrastructure.Services
@@ -21,7 +22,7 @@ namespace WorkFlow.Infrastructure.Services
             var payload = await GoogleJsonWebSignature.ValidateAsync(token);
 
             if (!payload.EmailVerified)
-                throw new Exception("Google email chưa được xác minh.");
+                throw new UnauthorizedException("Google email chưa được xác minh.");
 
             return new OAuthProfileDto
             {
@@ -39,7 +40,7 @@ namespace WorkFlow.Infrastructure.Services
             var response = await _http.GetFromJsonAsync<FacebookMeResponse>(url);
 
             if (response == null || string.IsNullOrEmpty(response.Id))
-                throw new Exception("Facebook token không hợp lệ");
+                throw new UnauthorizedException("Facebook token không hợp lệ");
 
             var email = !string.IsNullOrEmpty(response.Email)
             ? response.Email

@@ -4,6 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using WorkFlow.Application.Common.Exceptions;
 using WorkFlow.Application.Common.Interfaces.Services;
 using WorkFlow.Domain.Enums;
 
@@ -24,7 +25,7 @@ namespace WorkFlow.Infrastructure.Services
             var handler = new JwtSecurityTokenHandler();
 
             if (!handler.CanReadToken(accessToken))
-                throw new Exception("Token không hợp lệ");
+                throw new NotFoundException("Token không hợp lệ");
 
             var token = handler.ReadJwtToken(accessToken);
 
@@ -33,7 +34,7 @@ namespace WorkFlow.Infrastructure.Services
 
             var userIdClaim = token.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value;
             if (userIdClaim == null)
-                throw new Exception("Token không chứa userId");
+                throw new NotFoundException("Token không chứa userId");
 
             var userId = Guid.Parse(userIdClaim);
 

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
+using WorkFlow.Application.Common.Exceptions;
 using WorkFlow.Application.Common.Interfaces.Repository;
 using WorkFlow.Application.Common.Interfaces.Services;
 using WorkFlow.Infrastructure.Persistence;
@@ -43,7 +44,7 @@ namespace WorkFlow.Infrastructure
             if (useRedis)
             {
                 var redisConnectionString = configuration.GetConnectionString("Redis")
-                    ?? throw new InvalidOperationException("Redis connection string is not configured.");
+                    ?? throw new AppException("Redis connection string is not configured.");
 
                 var redisConfig = new ConfigurationOptions
                 {

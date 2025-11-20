@@ -30,7 +30,7 @@ namespace WorkFlow.Application.Common.Behaviors
                     .ToList();
                 if (failures.Count != 0)
                 {
-                    throw new ValidationException(failures);
+                    throw new WorkFlow.Application.Common.Exceptions.ValidationException(failures);
                 }
             }
 
