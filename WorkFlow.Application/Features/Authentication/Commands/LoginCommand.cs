@@ -46,7 +46,7 @@ namespace WorkFlow.Application.Features.Authentication.Commands
         {
             return request.Type.ToLower() switch
             {
-                "email" => HandleLocalLogin(request, cancellationToken),
+                "local" => HandleLocalLogin(request, cancellationToken),
                 "google" => HandleGoogleLogin(request, cancellationToken),
                 "facebook" => HandleFacebookLogin(request, cancellationToken),
                 _ => throw new NotSupportedException($"Login type '{request.Type}' is not supported.")

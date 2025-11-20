@@ -77,7 +77,7 @@ namespace WorkFlow.API.Middleware
 
         private async Task HandleUnauthorizedExceptionAsync(HttpContext context, UnauthorizedException ex)
         {
-            context.Response.StatusCode = 400;
+            context.Response.StatusCode = 401;
             context.Response.ContentType = "application/json";
 
             await context.Response.WriteAsJsonAsync(new
