@@ -1,6 +1,6 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using WorkFlow.Application.Features.Authentication.Commands;
 
 namespace WorkFlow.API.Controllers
@@ -18,7 +18,7 @@ namespace WorkFlow.API.Controllers
         }
 
         [HttpPost("Register")]
-         [AllowAnonymous]
+        [AllowAnonymous]
         public async Task<IActionResult> Register([FromBody] RegisterUserCommand command)
         {
             var result = await _mediator.Send(command);
@@ -58,6 +58,7 @@ namespace WorkFlow.API.Controllers
         }
 
         [HttpPost("RefreshToken")]
+        [AllowAnonymous]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenCommand command)
         {
             var result = await _mediator.Send(command);

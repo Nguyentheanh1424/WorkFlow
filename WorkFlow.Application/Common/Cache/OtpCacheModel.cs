@@ -7,7 +7,7 @@
         public OtpCacheModel() : base("") { }
 
         public OtpCacheModel(string key, string otp, TimeSpan ttl)
-        : base($"otp:{key}", absoluteTtl: ttl)
+        : base($"otp:{key}", absoluteExpiresAt: ttl)
         {
             Otp = otp;
         }

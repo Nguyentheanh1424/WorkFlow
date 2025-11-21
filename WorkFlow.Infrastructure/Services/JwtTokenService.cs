@@ -3,7 +3,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
-using System.Text;
 using WorkFlow.Application.Common.Exceptions;
 using WorkFlow.Application.Common.Interfaces.Services;
 using WorkFlow.Domain.Enums;
@@ -55,13 +54,14 @@ namespace WorkFlow.Infrastructure.Services
             var signingKey = _config["Jwt:SigningKey"];
             var accessMinutes = int.TryParse(_config["Jwt:AccessTokenMinutes"], out int value) ? value : 30;
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signingKey!));
+            var keyBytes = Convert.FromHexString(signingKey!);
+            var key = new SymmetricSecurityKey(keyBytes);
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
-                new Claim("provider", provider.ToString().ToLowerInvariant()),
+                new Claim("provider", provider.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 

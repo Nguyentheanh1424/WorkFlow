@@ -10,7 +10,7 @@
         public PendingUserCacheModel() : base("") { }
 
         public PendingUserCacheModel(string email, string name, string passwordHash, string salt, TimeSpan ttl)
-            : base($"pending-user:{email}", absoluteTtl: ttl)
+            : base($"pending-user:{email}", absoluteExpiresAt: ttl)
         {
             Email = email;
             Name = name;

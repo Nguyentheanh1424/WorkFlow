@@ -1,14 +1,18 @@
-﻿namespace WorkFlow.Application.Common.Cache
+﻿using System.Text.Json.Serialization;
+
+namespace WorkFlow.Application.Common.Cache
 {
     public class OtpAttemptCacheModel : CacheModelBase
     {
-        public int AttemptCount { get; set; } = 0;
-        public DateTime NextAvailableAt { get; set; } = DateTime.MinValue;
+        public int AttemptCount { get; set; }
+        public DateTime NextAvailableAt { get; set; }
 
-        public OtpAttemptCacheModel() { }
-
-        public OtpAttemptCacheModel(int attemptCount, DateTime nextAvailableAt, string key, TimeSpan ttl)
-            : base($"otp-attempt:{key}", absoluteTtl: ttl)
+        [JsonConstructor]
+        public OtpAttemptCacheModel() : base()
+        {
+        }
+        public OtpAttemptCacheModel(int attemptCount, DateTime nextAvailableAt, string cacheKey, TimeSpan absoluteExpiresAt)
+            : base($"otp-attempt:{cacheKey}", absoluteExpiresAt)
         {
             AttemptCount = attemptCount;
             NextAvailableAt = nextAvailableAt;

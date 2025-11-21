@@ -1,4 +1,5 @@
 ﻿using WorkFlow.Application.Common.Cache;
+using WorkFlow.Application.Common.Exceptions;
 using WorkFlow.Application.Common.Interfaces.Services;
 using WorkFlow.Domain.Common.Helpers;
 
@@ -47,10 +48,10 @@ namespace WorkFlow.Infrastructure.Services
             if (model == null)
             {
                 return new OtpAttemptCacheModel(
-                    key: key,
+                    cacheKey: key,
                     attemptCount: 0,
                     nextAvailableAt: DateTime.MinValue,
-                    ttl: AttemptTtl
+                    absoluteExpiresAt: AttemptTtl
                     );
             }
 
@@ -61,20 +62,18 @@ namespace WorkFlow.Infrastructure.Services
         {
             var attempt = await GetOrCreateAttemptAsync(key);
 
+            // Kiểm tra limit
+            if (attempt.AttemptCount >= MaxAttempts)
+            {
+                throw new BusinessException("Bạn đã yêu cầu OTP quá nhiều lần. Hãy thử lại sau 10 phút.");
+            }
+
             // Kiểm tra cooldown
             if (DateTime.UtcNow < attempt.NextAvailableAt)
             {
                 var remain = (attempt.NextAvailableAt - DateTime.UtcNow).TotalSeconds;
-                throw new Exception($"Bạn phải chờ thêm {Math.Ceiling(remain)} giây trước khi gửi OTP tiếp.");
+                throw new BusinessException($"Bạn phải chờ thêm {Math.Ceiling(remain)} giây trước khi gửi OTP tiếp.");
             }
-
-            // Kiểm tra limit
-            if (attempt.AttemptCount >= MaxAttempts)
-            {
-                throw new Exception("Bạn đã yêu cầu OTP quá nhiều lần. Hãy thử lại sau 10 phút.");
-            }
-
-
         }
 
         public async Task MarkOtpSentAsync(string key)

@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Text;
 using WorkFlow.API.Middleware;
 using WorkFlow.Application;
 using WorkFlow.Infrastructure;
@@ -22,7 +21,7 @@ builder.Services.AddSwaggerGen(c =>
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
-        Description = "Nhập vào định dạng: Bearer {token}",
+        Description = "Nhập vào định dạng: {token}",
         Name = "Authorization",
         Type = SecuritySchemeType.Http,
         Scheme = "bearer",
@@ -69,12 +68,26 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = jwtConfig["Audience"],
 
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(signingKey!)
-        ),
+        IssuerSigningKey = new SymmetricSecurityKey(Convert.FromHexString(signingKey!)),
 
         ValidateLifetime = true,
         ClockSkew = TimeSpan.Zero
+    };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnChallenge = async context =>
+        {
+            context.HandleResponse();
+
+            context.Response.StatusCode = 401;
+            context.Response.ContentType = "application/json";
+
+            await context.Response.WriteAsJsonAsync(new
+            {
+                message = "Token không hợp lệ hoặc đã hết hạn"
+            });
+        }
     };
 });
 
