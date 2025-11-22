@@ -4,8 +4,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
 using WorkFlow.Application.Common.Exceptions;
+using WorkFlow.Application.Common.Interfaces.Auth;
 using WorkFlow.Application.Common.Interfaces.Repository;
 using WorkFlow.Application.Common.Interfaces.Services;
+using WorkFlow.Infrastructure.Auth;
 using WorkFlow.Infrastructure.Persistence;
 using WorkFlow.Infrastructure.Repository;
 using WorkFlow.Infrastructure.Services;
@@ -36,6 +38,8 @@ namespace WorkFlow.Infrastructure
             services.AddScoped<IOtpService, OtpService>();
             services.AddHttpClient<IOAuthVerifier, OAuthVerifier>();
             services.AddScoped<ITokenService, JwtTokenService>();
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
+
 
 
             //Đăng ký Cache

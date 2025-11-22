@@ -60,7 +60,7 @@ namespace WorkFlow.Infrastructure.Services
 
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
+                new Claim("userId", userId.ToString()),
                 new Claim("provider", provider.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };

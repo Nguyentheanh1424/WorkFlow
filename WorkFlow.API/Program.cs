@@ -7,6 +7,9 @@ using WorkFlow.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add HttpContextAccessor for CurrentUserService
+builder.Services.AddHttpContextAccessor();
+
 // Add services to the container.
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
@@ -71,7 +74,7 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Convert.FromHexString(signingKey!)),
 
         ValidateLifetime = true,
-        ClockSkew = TimeSpan.Zero
+        ClockSkew = TimeSpan.Zero,
     };
 
     options.Events = new JwtBearerEvents
