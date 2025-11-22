@@ -16,14 +16,12 @@ namespace WorkFlow.Application.Features.Authentication.Commands
     public class LogoutCommandHandler : IRequestHandler<LogoutCommand, Result<string>>
     {
         private readonly IRepository<AccountAuth, Guid> _authRepository;
-        private readonly ITokenService _tokenService;
         private readonly IUnitOfWork _uow;
 
         public LogoutCommandHandler(
             ITokenService tokenService,
             IUnitOfWork uow)
         {
-            _tokenService = tokenService;
             _uow = uow;
             _authRepository = _uow.GetRepository<AccountAuth, Guid>();
         }

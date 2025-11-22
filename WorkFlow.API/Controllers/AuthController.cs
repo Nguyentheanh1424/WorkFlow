@@ -39,7 +39,7 @@ namespace WorkFlow.API.Controllers
 
         [HttpPost("ResendRegisterOtp")]
         [AllowAnonymous]
-        public async Task<IActionResult> ResendOtp([FromBody] ResendOtpCommand command)
+        public async Task<IActionResult> ResendOtp([FromBody] ResendRegisterOtpCommand command)
         {
             var result = await _mediator.Send(command);
             return result.IsSuccess

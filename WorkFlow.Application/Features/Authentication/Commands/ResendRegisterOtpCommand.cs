@@ -8,11 +8,11 @@ using WorkFlow.Domain.Entities;
 
 namespace WorkFlow.Application.Features.Authentication.Commands
 {
-    public record class ResendOtpCommand(string email) : IRequest<Result<string>>;
+    public record class ResendRegisterOtpCommand(string email) : IRequest<Result<string>>;
 
-    public class ResendOtpCommandValidator : AbstractValidator<ResendOtpCommand>
+    public class ResendRegisterOtpCommandValidator : AbstractValidator<ResendRegisterOtpCommand>
     {
-        public ResendOtpCommandValidator()
+        public ResendRegisterOtpCommandValidator()
         {
             RuleFor(x => x.email)
                 .NotEmpty().WithMessage("Email không được để trống.")
@@ -22,7 +22,7 @@ namespace WorkFlow.Application.Features.Authentication.Commands
         }
     }
 
-    public class ResendOtpCommandHandler : IRequestHandler<ResendOtpCommand, Result<string>>
+    public class ResendRegisterOtpCommandHandler : IRequestHandler<ResendRegisterOtpCommand, Result<string>>
     {
         private readonly IOtpService _otpService;
         private readonly IEmailService _emailService;
@@ -30,7 +30,7 @@ namespace WorkFlow.Application.Features.Authentication.Commands
         private readonly IUnitOfWork _unitOfWork;
         private readonly IRepository<User, Guid> _userRepository;
 
-        public ResendOtpCommandHandler(
+        public ResendRegisterOtpCommandHandler(
             IOtpService otpService,
             IEmailService emailService,
             ICacheService cacheService,
@@ -43,7 +43,7 @@ namespace WorkFlow.Application.Features.Authentication.Commands
             _userRepository = _unitOfWork.GetRepository<User, Guid>();
         }
 
-        public async Task<Result<string>> Handle(ResendOtpCommand request, CancellationToken cancellationToken)
+        public async Task<Result<string>> Handle(ResendRegisterOtpCommand request, CancellationToken cancellationToken)
         {
             var email = request.email.Trim().ToLower();
 
@@ -68,7 +68,8 @@ namespace WorkFlow.Application.Features.Authentication.Commands
             await _emailService.SendAsync(
                 email,
                 "Xác thực tài khoản",
-                $"<p>Mã OTP của bạn là: <strong>{otp}</strong></p>"
+                $"<p>Mã OTP của bạn là: <strong>{otp}</strong></p>" +
+                $"<p>Mã OTP của bạn có hiệu lực trong vòng 2 phút. Vui lòng sử dụng nhanh chóng!"
             );
 
             return Result<string>.Success("Gửi lại OTP thành công. Vui lòng kiểm tra email để xác thực OTP");

@@ -27,7 +27,7 @@ namespace WorkFlow.Infrastructure.Services
         public async Task<string> GenerateAsync(string key, int length = 6)
         {
             //var otp = OtpGenerator.GenerateNumeric(length);
-            var otp = OtpGenerator.GenerateAlphaNumeric(length);
+            var otp = OtpGenerator.Generate(length);
 
             // TTL OTP 2 phút
             var ttl = TimeSpan.FromMinutes(2);
