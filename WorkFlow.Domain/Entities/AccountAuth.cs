@@ -75,7 +75,7 @@ namespace WorkFlow.Domain.Entities
             LastLoginAt = DateTime.UtcNow;
         }
 
-        public void MarkLoginFailed(int maxFail = 5, int lockMinutes = 30)
+        public string MarkLoginFailed(int maxFail = 5, int lockMinutes = 30)
         {
             LoginAttempt++;
 
@@ -83,17 +83,59 @@ namespace WorkFlow.Domain.Entities
             {
                 LockedUntil = DateTime.UtcNow.AddMinutes(lockMinutes);
                 LoginAttempt = 0;
+                return "Tài khoản bị khóa trong " + lockMinutes + " phút.";
             }
+
+            return "Tài khoản sẽ bị khóa sau " + (maxFail - LoginAttempt) + " lần đăng nhập thất bại nữa.";
         }
 
-        public bool IsLocked()
+        public (bool isLocked, string? remaining) IsLocked()
         {
-            return LockedUntil.HasValue && DateTime.UtcNow < LockedUntil.Value;
+            if (!LockedUntil.HasValue)
+                return (false, null);
+
+            bool locked = DateTime.UtcNow < LockedUntil.Value;
+            TimeSpan? remaining = locked ? LockedUntil.Value - DateTime.UtcNow : null;
+
+            string? formatted = remaining?.ToString(@"mm\:ss");
+
+            return (locked, formatted);
         }
 
-        public void SetStatus(AccountStatus status)
+
+        public (bool isUsable, string message) IsActive()
         {
-            Status = status;
+            bool isUsable = true;
+            string message = string.Empty;
+
+            switch (Status)
+            {
+                case AccountStatus.Actived:
+                    message = "Tài khoản đã được kích hoạt.";
+                    break;
+
+                case AccountStatus.Looked:
+                    isUsable = false;
+                    message = "Tài khoản đã bị khóa, vui lòng liên hệ quản trị viên qua Zalo theo số liên hệ 0966963030 để kích hoạt lại tài khoản.";
+                    break;
+
+                case AccountStatus.Banned:
+                    isUsable = false;
+                    message = "Tài khoản đã bị khóa vĩnh viễn.";
+                    break;
+
+                case AccountStatus.Deleted:
+                    isUsable = false;
+                    message = "Tài khoản đã bị xóa.";
+                    break;
+
+                default:
+                    isUsable = false;
+                    message = "Trạng thái tài khoản không hợp lệ.";
+                    break;
+            }
+
+            return (isUsable, message);
         }
     }
 }
