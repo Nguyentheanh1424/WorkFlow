@@ -75,5 +75,40 @@ namespace WorkFlow.API.Controllers
                 ? Ok(result)
                 : BadRequest(result);
         }
+        [HttpPost("ResetPasswordSendOtp")]
+        public async Task<IActionResult> SendResetOtp()
+        {
+            var result = await _mediator.Send(new ResetPasswordSendOtpCommand());
+            return result.IsSuccess 
+                ? Ok(result) 
+                : BadRequest(result);
+        }
+
+        [HttpPost("ResetPasswordVerify")]
+        public async Task<IActionResult> VerifyResetPassword([FromBody] ResetPasswordVerifyCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return result.IsSuccess 
+                ? Ok(result) 
+                : BadRequest(result);
+        }
+        [HttpPost("ForgotPasswordSendOtp")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ForgotPasswordSendOtp([FromBody] ForgotPasswordSendOtpCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return result.IsSuccess 
+                ? Ok(result) 
+                : BadRequest(result);
+        }
+        [HttpPost("ForgotPasswordVerify")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ForgotPasswordVerify([FromBody] ForgotPasswordVerifyCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return result.IsSuccess 
+                ? Ok(result) 
+                : BadRequest(result);
+        }
     }
 }
