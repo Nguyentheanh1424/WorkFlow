@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: workflow-api
+    env: native
+    runtime: dotnet
+    buildCommand: "dotnet restore ./WorkFlow.API/WorkFlow.API.csproj && dotnet publish ./WorkFlow.API/WorkFlow.API.csproj -c Release -o out"
+    startCommand: "dotnet out/WorkFlow.API.dll"
+    plan: free
+    autoDeploy: true

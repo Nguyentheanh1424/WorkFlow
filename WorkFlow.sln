@@ -11,13 +11,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkFlow.Domain", "WorkFlow
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkFlow.Infrastructure", "WorkFlow.Infrastructure\WorkFlow.Infrastructure.csproj", "{141E7125-0568-4A8E-84F2-0F0AEB3A5BF2}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "domain", "domain", "{8C256F11-09A1-46DA-920C-C7C211AECCB2}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{3DA93D37-B0C1-4914-88B4-1DF27CD6F006}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
 	ProjectSection(SolutionItems) = preProject
-		Entity.md = Entity.md
+		render.yaml = render.yaml
 	EndProjectSection
 EndProject
 Global
@@ -45,10 +41,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{8C256F11-09A1-46DA-920C-C7C211AECCB2} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
-		{3DA93D37-B0C1-4914-88B4-1DF27CD6F006} = {8C256F11-09A1-46DA-920C-C7C211AECCB2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FAEFA5CF-2474-4BA5-B613-4BE900507950}

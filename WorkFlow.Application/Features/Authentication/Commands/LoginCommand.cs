@@ -61,16 +61,22 @@ namespace WorkFlow.Application.Features.Authentication.Commands
             var auth = await _authRepository.FirstOrDefaultAsync(a => a.UserId == user.Id && a.Provider == EnumExtensions.GetName(AccountProvider.Local))
                 ?? throw new AppException("Tài khoản chưa thiết lập phương thức đăng nhập này.");
 
-            if (auth.IsLocked())
-                throw new ForbiddenAccessException("Tài khoản bị khóa, vui lòng liên hệ quản trị viên theo số điện thoại 0966963030 để được hỗ trợ.");
+            var (isUsable, _message) = auth.IsActive();
+            if (!isUsable)
+                throw new ForbiddenAccessException(_message);
+
+            var (isLocked, remaining) = auth.IsLocked();
+            if (isLocked)
+                throw new ForbiddenAccessException($"Tài khoản bị khóa trong {remaining} phút.");
 
             var isLoginValid = PasswordHasher.Verify(request.Password!, auth.PasswordHash!, auth.Salt!);
             if (!isLoginValid)
             {
-                auth.MarkLoginFailed();
+                var message = auth.MarkLoginFailed();
                 await _authRepository.UpdateAsync(auth);
                 await _uow.SaveChangesAsync(cancellationToken);
-                throw new UnauthorizedException("Mật khẩu không đúng, vui lòng thử lại.");
+                throw new UnauthorizedException($"Mật khẩu không đúng. " +
+                    $"{message}");
             }
 
             auth.MarkLoginSuccess();
