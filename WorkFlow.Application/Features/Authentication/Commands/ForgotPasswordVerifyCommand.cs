@@ -22,8 +22,7 @@ public class ForgotPasswordVerifyValidator : AbstractValidator<ForgotPasswordVer
                 .Matches("[A-Z]").WithMessage("Mật khẩu phải chứa ít nhất 1 chữ hoa (A-Z).")
                 .Matches("[a-z]").WithMessage("Mật khẩu phải chứa ít nhất 1 chữ thường (a-z).")
                 .Matches("[0-9]").WithMessage("Mật khẩu phải chứa ít nhất 1 chữ số (0-9).")
-                .Matches("[^a-zA-Z0-9]").WithMessage("Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt.")
-                .WithMessage("Mật khẩu không hợp lệ.");
+                .Matches("[^a-zA-Z0-9]").WithMessage("Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt.");
     }
 }
 
