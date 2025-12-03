@@ -1,0 +1,65 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using WorkFlow.Domain.Common;
+using WorkFlow.Domain.Enums;
+
+namespace WorkFlow.Domain.Entities
+{
+    public class Board : FullAuditEntity<Guid>
+    {
+        public Guid WorkspaceId { get; set; }
+        public Guid OwnerId { get; set; }
+
+        public string Title { get; set; } = null!;
+        public VisibilityBoard Visibility { get; set; }
+
+        public string? Background { get; set; }
+        public string? Description { get; set; }
+
+        public bool Pinned { get; set; }
+
+        protected Board() { }
+
+        public static Board Create(Guid workspaceId, Guid ownerId, string title, VisibilityBoard visibility,
+                                   string? background = null, string? description = null)
+        {
+            return new Board
+            {
+                WorkspaceId = workspaceId,
+                OwnerId = ownerId,
+                Title = title,
+                Visibility = visibility,
+                Background = background,
+                Description = description,
+                Pinned = false
+            };
+        }
+
+        public void Rename(string newTitle)
+        {
+            Title = newTitle;
+        }
+
+        public void ChangeVisibility(VisibilityBoard newVisibility)
+        {
+            Visibility = newVisibility;
+        }
+
+        public void SetBackground(string? background)
+        {
+            Background = background;
+        }
+
+        public void SetDescription(string? description)
+        {
+            Description = description;
+        }
+
+        public void Pin() => Pinned = true;
+
+        public void Unpin() => Pinned = false;
+    }
+}

@@ -3,7 +3,7 @@ using WorkFlow.Domain.Enums;
 
 namespace WorkFlow.Domain.Entities
 {
-    public class AccountAuth : AuditableEntity<Guid>
+    public class AccountAuth : ModificationAuditEntity<Guid>
     {
         public Guid UserId { get; private set; } = default!;
 

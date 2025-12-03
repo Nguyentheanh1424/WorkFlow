@@ -30,7 +30,7 @@ namespace WorkFlow.Infrastructure.Services
             var otp = OtpGenerator.Generate(length);
 
             // TTL OTP 2 phút
-            var ttl = TimeSpan.FromMinutes(2);
+            var ttl = TimeSpan.FromMinutes(5);
 
             var model = new OtpCacheModel(key, otp, ttl);
 
