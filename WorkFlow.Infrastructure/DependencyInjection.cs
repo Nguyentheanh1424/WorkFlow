@@ -40,8 +40,6 @@ namespace WorkFlow.Infrastructure
             services.AddScoped<ITokenService, JwtTokenService>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
 
-
-
             //Đăng ký Cache
             var useRedis = bool.TryParse(configuration["Cache:UseRedis"], out var val) && val;
 

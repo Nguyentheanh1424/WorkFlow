@@ -1,9 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using WorkFlow.API.Hubs;
 using WorkFlow.API.Middleware;
 using WorkFlow.Application;
+using WorkFlow.Application.Common.Interfaces.Services;
 using WorkFlow.Infrastructure;
+using WorkFlow.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +15,8 @@ builder.Services.AddHttpContextAccessor();
 
 // Add services to the container.
 builder.Services.AddApplication();
+builder.Services.AddScoped<IRealtimeService, RealtimeService>();
+
 builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddControllers();
@@ -61,6 +66,9 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+// SignalR
+builder.Services.AddSignalR();
+
 
 // Configure Middleware and the HTTP request pipeline.
 var jwtConfig = builder.Configuration.GetSection("Jwt");
@@ -93,6 +101,22 @@ builder.Services.AddAuthentication(options =>
 
     options.Events = new JwtBearerEvents
     {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) &&
+                (path.StartsWithSegments("/hubs/board")
+                || path.StartsWithSegments("/hubs/workspace")
+                || path.StartsWithSegments("/hubs/user")))
+            {
+                context.Token = accessToken;
+            }
+
+            return Task.CompletedTask;
+        },
+
         OnChallenge = async context =>
         {
             context.HandleResponse();
@@ -119,15 +143,19 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+app.UseMiddleware<ErrorHandling>();
+
+//app.UseHttpsRedirection();
 
 app.UseCors("AllowFrontend");
-
-app.UseMiddleware<ErrorHandling>();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<BoardHub>("/hubs/board");
+app.MapHub<WorkspaceHub>("/hubs/workspace");
+app.MapHub<UserHub>("/hubs/user");
 
 app.Run();
