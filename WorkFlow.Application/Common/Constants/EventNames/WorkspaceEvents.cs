@@ -8,6 +8,7 @@ namespace WorkFlow.Application.Common.Constants.EventNames
 {
     public static class WorkspaceEvents
     {
+        public const string Create = "Workspace.Create";
         public const string Updated = "Workspace.Updated";
         public const string Deleted = "Workspace.Deleted";
 

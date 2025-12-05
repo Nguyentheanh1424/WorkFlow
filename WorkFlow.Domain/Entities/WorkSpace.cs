@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WorkFlow.Domain.Common;
+using WorkFlow.Domain.Enums;
 
 namespace WorkFlow.Domain.Entities
 {
@@ -12,11 +13,11 @@ namespace WorkFlow.Domain.Entities
         public string Name { get; set; } = null!;
         public string? Background { get; set; }
         public string? Description { get; set; }
-        public int Type { get; set; }
+        public WorkSpaceType Type { get; set; }
 
         protected WorkSpace() { }
 
-        public static WorkSpace Create(string name, int type, string? background, string? description)
+        public static WorkSpace Create(string name, WorkSpaceType type, string? background, string? description)
         {
             return new WorkSpace
             {
