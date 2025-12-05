@@ -10,6 +10,8 @@ using WorkFlow.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.SetMinimumLevel(LogLevel.Debug);
+
 // Add HttpContextAccessor for CurrentUserService
 builder.Services.AddHttpContextAccessor();
 
@@ -96,6 +98,8 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Convert.FromHexString(signingKey!)),
 
         ValidateLifetime = true,
+
+        NameClaimType = "userId",
         ClockSkew = TimeSpan.Zero,
     };
 
@@ -106,6 +110,7 @@ builder.Services.AddAuthentication(options =>
             var accessToken = context.Request.Query["access_token"];
 
             var path = context.HttpContext.Request.Path;
+
             if (!string.IsNullOrEmpty(accessToken) &&
                 (path.StartsWithSegments("/hubs/board")
                 || path.StartsWithSegments("/hubs/workspace")

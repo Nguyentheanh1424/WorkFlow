@@ -1,29 +1,20 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using WorkFlow.Application.Common.Interfaces.Auth;
 
 namespace WorkFlow.API.Hubs
 {
     public class UserHub : Hub
     {
-        private readonly ICurrentUserService _currentUserService;
-
-        public UserHub(ICurrentUserService currentUserService)
-        {
-            _currentUserService = currentUserService;
-        }
-
         public override async Task OnConnectedAsync()
         {
-            var userId = _currentUserService.UserId.ToString();
+            Console.WriteLine("[HUB] CONNECTED");
+            Console.WriteLine("ConnectionId = " + Context.ConnectionId);
+
+            var userId = Context.User?.FindFirst("userId")?.Value;
+
             if (!string.IsNullOrWhiteSpace(userId))
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, $"user:{userId}");
+                Console.WriteLine($"Joined group user:{userId}");
             }
 
             await base.OnConnectedAsync();
@@ -31,7 +22,8 @@ namespace WorkFlow.API.Hubs
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            var userId = _currentUserService.UserId.ToString();
+            var userId = Context.User?.FindFirst("userId")?.Value;
+
             if (!string.IsNullOrWhiteSpace(userId))
             {
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"user:{userId}");
@@ -40,4 +32,5 @@ namespace WorkFlow.API.Hubs
             await base.OnDisconnectedAsync(exception);
         }
     }
+
 }
