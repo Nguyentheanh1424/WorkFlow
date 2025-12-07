@@ -82,7 +82,7 @@ namespace WorkFlow.Application.Features.BoardMembers.Commands
             var member = BoardMember.Create(board.Id, request.UserId, request.Role);
             await _boardMemberRepository.AddAsync(member);
 
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             var dto = new BoardMemberDto
             {

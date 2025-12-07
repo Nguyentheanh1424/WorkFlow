@@ -1,52 +1,50 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using WorkFlow.Application.Features.InviteLinks.Commands.CreateInviteLink;
-using WorkFlow.Application.Features.InviteLinks.Commands.RevokeInviteLink;
-using WorkFlow.Application.Features.InviteLinks.Commands.VerifyInviteLink;
-using WorkFlow.Application.Features.InviteLinks.Commands.JoinByInviteLink;
+using WorkFlow.Application.Features.InviteLinks.Commands;
 using WorkFlow.Application.Features.InviteLinks.Dtos;
 using WorkFlow.Application.Features.InviteLinks.Queries;
+using WorkFlow.Domain.Common;
 
 namespace WorkFlow.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
     public class InviteLinkController : ControllerBase
-{
-    private readonly IMediator _mediator;
-
-    public InviteLinkController(IMediator mediator)
     {
-        _mediator = mediator;
-    }
+        private readonly IMediator _mediator;
 
-    [HttpPost("{create}")]
-    public async Task<IActionResult> Create([FromBody] CreateInviteLinkDto request)
-    {
-        var result = await _mediator.Send(new CreateInviteLinkCommand(request));
-        return Ok(result);
-    }
+        public InviteLinkController(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
 
-    [HttpGet("{token}")]
-    public async Task<IActionResult> GetInfo(string token)
-    {
-        var result = await _mediator.Send(new GetInviteLinkQuery(token));
-        return Ok(result);
-    }
+        [HttpPost("{create}")]
+        public async Task<IActionResult> Create([FromBody] CreateInviteLinkDto request)
+        {
+            var result = await _mediator.Send(new CreateInviteLinkCommand(request));
+            return Ok(result);
+        }
 
-    [HttpPost("{token}/Verify")]
-    public async Task<IActionResult> Verify(string token)
-    {
-        var result = await _mediator.Send(new VerifyInviteLinkCommand(token));
-        return Ok(result);
-    }
+        [HttpGet("{token}")]
+        public async Task<IActionResult> GetInfo(string token)
+        {
+            var result = await _mediator.Send(new GetInviteLinkQuery(token));
+            return Ok(result);
+        }
 
-    [HttpPost("{id:guid}/Vevoke")]
-    public async Task<IActionResult> Revoke(Guid id)
-    {
-        await _mediator.Send(new RevokeInviteLinkCommand(id));
-        return NoContent();
-    }
+        [HttpPost("{token}/Verify")]
+        public async Task<IActionResult> Verify(string token)
+        {
+            var result = await _mediator.Send(new VerifyInviteLinkCommand(token));
+            return Ok(result);
+        }
+
+        [HttpPost("{tagetId:guid}/Revoke")]
+        public async Task<IActionResult> Revoke(Guid tagetId)
+        {
+            var result =  await _mediator.Send(new RevokeInviteLinkCommand(tagetId));
+            return Ok(result);
+        }
 
         [HttpPost("{token}/Join")]
         public async Task<IActionResult> Join(string token)

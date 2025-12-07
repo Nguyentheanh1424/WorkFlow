@@ -1,3 +1,4 @@
+using FluentValidation;
 using MediatR;
 using WorkFlow.Application.Common.Interfaces.Repository;
 using WorkFlow.Application.Features.InviteLinks.Dtos;
@@ -5,10 +6,19 @@ using WorkFlow.Domain.Common;
 using WorkFlow.Domain.Entities;
 using WorkFlow.Domain.Enums;
 
-namespace WorkFlow.Application.Features.InviteLinks.Commands.CreateInviteLink
+namespace WorkFlow.Application.Features.InviteLinks.Commands
 {
-    public class CreateInviteLinkCommandHandler
-        : IRequestHandler<CreateInviteLinkCommand, Result<InviteLinkDto>>
+    public record CreateInviteLinkCommand(CreateInviteLinkDto Request) : IRequest<Result<InviteLinkDto>>;
+    public class CreateInviteLinkCommandValidator : AbstractValidator<CreateInviteLinkCommand>
+    {
+        public CreateInviteLinkCommandValidator()
+        {
+            RuleFor(x => x.Request).NotNull();
+            RuleFor(x => x.Request.Type).IsInEnum();
+            RuleFor(x => x.Request.TargetId).NotEmpty();
+        }
+    }
+    public class CreateInviteLinkCommandHandler : IRequestHandler<CreateInviteLinkCommand, Result<InviteLinkDto>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IRepository<InviteLink, Guid> _repository;
@@ -24,7 +34,7 @@ namespace WorkFlow.Application.Features.InviteLinks.Commands.CreateInviteLink
             var token = Guid.NewGuid().ToString("N");
             var workSpaceId = request.Request.Type == InviteLinkType.WorkSpace ? request.Request.TargetId : (Guid?)null;
             var boardId = request.Request.Type == InviteLinkType.Board ? request.Request.TargetId : (Guid?)null;
-            
+
             var link = InviteLink.Create(
                 request.Request.Type,
                 token,
@@ -34,7 +44,7 @@ namespace WorkFlow.Application.Features.InviteLinks.Commands.CreateInviteLink
             );
 
             await _repository.AddAsync(link);
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return Result<InviteLinkDto>.Success(new InviteLinkDto
             {

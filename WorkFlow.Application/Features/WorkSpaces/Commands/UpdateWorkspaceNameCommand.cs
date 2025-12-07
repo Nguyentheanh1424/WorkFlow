@@ -43,7 +43,7 @@ namespace WorkFlow.Application.Features.WorkSpaces.Commands
 
             workspace.UpdateName(request.Name);
 
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return Result<WorkSpaceDto>.Success(_mapper.Map<WorkSpaceDto>(workspace));
         }

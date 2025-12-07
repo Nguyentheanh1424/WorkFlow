@@ -45,7 +45,7 @@ public class ForgotPasswordVerifyHandler
         _authRepo = _uow.GetRepository<AccountAuth, Guid>();
     }
 
-    public async Task<Result<string>> Handle(ForgotPasswordVerifyCommand request, CancellationToken ct)
+    public async Task<Result<string>> Handle(ForgotPasswordVerifyCommand request, CancellationToken cancellationToken)
     {
         var user = await _userRepo.FirstOrDefaultAsync(x => x.Email == request.Email)
             ?? throw new NotFoundException("Email không tồn tại.");
@@ -61,7 +61,7 @@ public class ForgotPasswordVerifyHandler
         var (hash, salt) = PasswordHasher.Hash(request.NewPassword);
         account.SetPassword(hash, salt);
 
-        await _uow.SaveChangesAsync(ct);
+        await _uow.SaveChangesAsync(cancellationToken);
 
         return Result<string>.Success("Khôi phục mật khẩu thành công.");
     }

@@ -78,7 +78,7 @@ namespace WorkFlow.Application.Features.Authentication.Commands
 
             await _accountAuthRepository.AddAsync(auth);
 
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             await _cacheService.RemoveAsync(cacheKey);
 

@@ -74,7 +74,7 @@ namespace WorkFlow.Application.Features.WorkSpaces.Commands
             var ownerMember = WorkspaceMember.Create(workspace.Id, userId, WorkSpaceRole.Owner);
             await _workspaceMemberRepository.AddAsync(ownerMember);
 
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             var dto = _mapper.Map<WorkSpaceDto>(workspace);
 

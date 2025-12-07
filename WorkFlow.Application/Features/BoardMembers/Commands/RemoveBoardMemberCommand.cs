@@ -68,7 +68,7 @@ namespace WorkFlow.Application.Features.BoardMembers.Commands
             }
 
             await _boardMemberRepository.DeleteAsync(member);
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             await _realtime.SendToUserAsync(
                 request.UserId,

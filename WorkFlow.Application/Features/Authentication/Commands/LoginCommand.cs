@@ -103,16 +103,16 @@ namespace WorkFlow.Application.Features.Authentication.Commands
         private async Task<Result<LoginResultDto>> HandleGoogleLogin(LoginCommand request, CancellationToken cancellationToken)
         {
             var profile = await _oAuthVerifier.VerifyGoogleAsync(request.Token!);
-            return await HandleOAuth(profile, AccountProvider.Google);
+            return await HandleOAuth(profile, AccountProvider.Google, cancellationToken);
         }
 
         private async Task<Result<LoginResultDto>> HandleFacebookLogin(LoginCommand request, CancellationToken cancellationToken)
         {
             var profile = await _oAuthVerifier.VerifyFacebookAsync(request.Token!);
-            return await HandleOAuth(profile, AccountProvider.Facebook);
+            return await HandleOAuth(profile, AccountProvider.Facebook, cancellationToken);
         }
 
-        private async Task<Result<LoginResultDto>> HandleOAuth(OAuthProfileDto profile, AccountProvider provider)
+        private async Task<Result<LoginResultDto>> HandleOAuth(OAuthProfileDto profile, AccountProvider provider, CancellationToken cancellationToken)
         {
             var auth = await _authRepository.FirstOrDefaultAsync(a => a.ProviderUid == profile.Uid && a.Provider == EnumExtensions.GetName(provider))
                 ?? throw new NotFoundException("Chưa tạo tài khoản hoặc chưa kết nối phương thức đăng nhập");
@@ -124,7 +124,7 @@ namespace WorkFlow.Application.Features.Authentication.Commands
             auth.SetRefreshToken(refreshToken, refreshTokenExpiryDays);
             auth.MarkLoginSuccess();
             await _authRepository.UpdateAsync(auth);
-            await _uow.SaveChangesAsync();
+            await _uow.SaveChangesAsync(cancellationToken);
 
             var data = new LoginResultDto
             {

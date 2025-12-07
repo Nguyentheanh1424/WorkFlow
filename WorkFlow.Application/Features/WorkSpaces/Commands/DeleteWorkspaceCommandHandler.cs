@@ -25,7 +25,7 @@ namespace WorkFlow.Application.Features.WorkSpaces.Commands
             // Soft delete - mark as deleted by setting DeletedOn timestamp
             // This assumes the entity uses soft delete from FullAuditEntity
             await _repository.DeleteAsync(workspace);
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return Result<bool>.Success(true);
         }

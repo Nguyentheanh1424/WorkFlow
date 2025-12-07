@@ -40,7 +40,7 @@ namespace WorkFlow.Application.Features.WorkSpaces.Commands
 
             workspace.UpdateBackground(request.Background);
 
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return Result<WorkSpaceDto>.Success(_mapper.Map<WorkSpaceDto>(workspace));
         }
