@@ -3,6 +3,8 @@ using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using WorkFlow.Application.Common.Behaviors;
+using WorkFlow.Application.Common.Interfaces.Services;
+using WorkFlow.Application.Common.Services;
 
 namespace WorkFlow.Application
 {
@@ -28,6 +30,12 @@ namespace WorkFlow.Application
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(PerformanceBehavior<,>));
+
+            // Permission services
+            services.AddScoped<IWorkspacePermissionService, WorkspacePermissionService>();
+            services.AddScoped<IBoardPermissionService, BoardPermissionService>();
+            services.AddScoped<ICardPermissionService, CardPermissionService>();
+            services.AddScoped<IPermissionService, PermissionService>();
 
             return services;
         }
