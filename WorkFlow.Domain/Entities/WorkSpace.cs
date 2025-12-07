@@ -33,7 +33,17 @@ namespace WorkFlow.Domain.Entities
             Name = newName;
         }
 
+        public void UpdateName(string newName)
+        {
+            Name = newName;
+        }
+
         public void ChangeDescription(string? newDescription)
+        {
+            Description = newDescription;
+        }
+
+        public void UpdateDescription(string? newDescription)
         {
             Description = newDescription;
         }
@@ -41,6 +51,16 @@ namespace WorkFlow.Domain.Entities
         public void ChangeBackground(string? newBackground)
         {
             Background = newBackground;
+        }
+
+        public void UpdateBackground(string? newBackground)
+        {
+            Background = newBackground;
+        }
+
+        public void UpdateType(WorkSpaceType newType)
+        {
+            Type = newType;
         }
     }
 }
