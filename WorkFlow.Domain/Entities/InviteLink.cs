@@ -12,7 +12,7 @@ namespace WorkFlow.Domain.Entities
     {
         public InviteLinkType Type { get; set; }
         public string Token { get; set; } = null!;
-        public bool IsRevoked { get; set; }
+        public InviteLinkStatus Status { get; set; }
         public DateTime? ExpiredAt { get; set; }
 
         public Guid? WorkSpaceId { get; set; }
@@ -29,18 +29,39 @@ namespace WorkFlow.Domain.Entities
                 WorkSpaceId = workSpaceId,
                 BoardId = boardId,
                 ExpiredAt = expiredAt,
-                IsRevoked = false
+                Status = InviteLinkStatus.Active
             };
         }
 
         public void Revoke()
         {
-            IsRevoked = true;
+            Status = InviteLinkStatus.Revoked;
+        }
+
+        public void Expire()
+        {
+            Status = InviteLinkStatus.Expired;
         }
 
         public void UpdateExpire(DateTime? newExpireAt)
         {
             ExpiredAt = newExpireAt;
         }
+
+        public bool CheckAndUpdateExpireStatus()
+        {
+            if (Status == InviteLinkStatus.Expired || Status == InviteLinkStatus.Revoked)
+                return false;
+
+            if (ExpiredAt.HasValue && ExpiredAt < DateTime.UtcNow)
+            {
+                Expire();
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool IsActive() => Status == InviteLinkStatus.Active && (ExpiredAt == null || ExpiredAt > DateTime.UtcNow);
     }
 }
