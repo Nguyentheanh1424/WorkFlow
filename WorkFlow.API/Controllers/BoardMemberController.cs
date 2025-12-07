@@ -19,14 +19,14 @@ namespace WorkFlow.API.Controllers
             _mediator = mediator;
         }
 
-        [HttpGet("{boardId:guid}/members")]
+        [HttpGet("{boardId:guid}/Members")]
         public async Task<IActionResult> GetBoardMembers(Guid boardId)
         {
             var result = await _mediator.Send(new GetBoardMembersQuery(boardId));
             return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
 
-        [HttpPost("{boardId:guid}/members")]
+        [HttpPost("{boardId:guid}/Members")]
         public async Task<IActionResult> AddBoardMember(Guid boardId, [FromBody] AddMemberBody body)
         {
             var command = new AddBoardMemberCommand(boardId, body.UserId, body.Role);
@@ -41,7 +41,7 @@ namespace WorkFlow.API.Controllers
             public BoardRole Role { get; set; }
         }
 
-        [HttpDelete("{boardId:guid}/members/{userId:guid}")]
+        [HttpDelete("{boardId:guid}/Members/{userId:guid}")]
         public async Task<IActionResult> RemoveBoardMember(Guid boardId, Guid userId)
         {
             var result = await _mediator.Send(new RemoveBoardMemberCommand(boardId, userId));

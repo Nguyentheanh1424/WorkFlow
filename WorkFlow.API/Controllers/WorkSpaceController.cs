@@ -40,7 +40,7 @@ namespace WorkFlow.API.Controllers
             return result.IsSuccess ? Ok(result) : NotFound(result);
         }
 
-        [HttpPut("{id}/name")]
+        [HttpPut("{id}/Name")]
         public async Task<IActionResult> UpdateName(Guid id, [FromBody] UpdateNameRequest request)
         {
             var command = new UpdateWorkspaceNameCommand(id, request.Name);
@@ -48,7 +48,7 @@ namespace WorkFlow.API.Controllers
             return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
 
-        [HttpPut("{id}/description")]
+        [HttpPut("{id}/Description")]
         public async Task<IActionResult> UpdateDescription(Guid id, [FromBody] UpdateDescriptionRequest request)
         {
             var command = new UpdateWorkspaceDescriptionCommand(id, request.Description);
@@ -56,7 +56,7 @@ namespace WorkFlow.API.Controllers
             return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
 
-        [HttpPut("{id}/background")]
+        [HttpPut("{id}/Background")]
         public async Task<IActionResult> UpdateBackground(Guid id, [FromBody] UpdateBackgroundRequest request)
         {
             var command = new UpdateWorkspaceBackgroundCommand(id, request.Background);
@@ -64,7 +64,7 @@ namespace WorkFlow.API.Controllers
             return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
 
-        [HttpPut("{id}/type")]
+        [HttpPut("{id}/Type")]
         public async Task<IActionResult> UpdateType(Guid id, [FromBody] UpdateTypeRequest request)
         {
             var command = new UpdateWorkspaceTypeCommand(id, request.Type);

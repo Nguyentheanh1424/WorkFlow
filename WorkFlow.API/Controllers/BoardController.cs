@@ -27,10 +27,10 @@ namespace WorkFlow.API.Controllers
                 : BadRequest(result);
         }
 
-        [HttpPut("{id:guid}/title")]
-        public async Task<IActionResult> UpdateTitle(Guid id, [FromBody] string title)
+        [HttpPut("{boardId:guid}/Title")]
+        public async Task<IActionResult> UpdateTitle(Guid boardId, [FromBody] string title)
         {
-            var result = await _mediator.Send(new UpdateBoardTitleCommand(id, title));
+            var result = await _mediator.Send(new UpdateBoardTitleCommand(boardId, title));
 
             return result.IsSuccess
                 ? Ok(result)

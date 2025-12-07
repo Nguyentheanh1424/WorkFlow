@@ -34,21 +34,21 @@ namespace WorkFlow.API.Controllers
         return Ok(result);
     }
 
-    [HttpPost("{token}/verify")]
+    [HttpPost("{token}/Verify")]
     public async Task<IActionResult> Verify(string token)
     {
         var result = await _mediator.Send(new VerifyInviteLinkCommand(token));
         return Ok(result);
     }
 
-    [HttpPost("{id:guid}/revoke")]
+    [HttpPost("{id:guid}/Vevoke")]
     public async Task<IActionResult> Revoke(Guid id)
     {
         await _mediator.Send(new RevokeInviteLinkCommand(id));
         return NoContent();
     }
 
-        [HttpPost("{token}/join")]
+        [HttpPost("{token}/Join")]
         public async Task<IActionResult> Join(string token)
         {
             var result = await _mediator.Send(new JoinByInviteLinkCommand(token));
