@@ -6,7 +6,7 @@ using WorkFlow.Application.Features.Workflows.Queries;
 namespace WorkFlow.API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class WorkflowsController
     {
         private readonly IMediator _mediator;

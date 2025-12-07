@@ -28,6 +28,7 @@ namespace WorkFlow.Infrastructure.Persistence
         public DbSet<BoardMember> BoardMembers { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Attachment> Attachments { get; set; }
+        public DbSet<WorkspaceMember> WorkspaceMembers { get; set; }
 
 
 

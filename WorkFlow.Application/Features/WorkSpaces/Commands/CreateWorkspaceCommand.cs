@@ -2,11 +2,10 @@
 using FluentValidation;
 using MediatR;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using WorkFlow.Application.Common.Constants.EventNames;
+using WorkFlow.Application.Common.Exceptions;
 using WorkFlow.Application.Common.Interfaces.Auth;
 using WorkFlow.Application.Common.Interfaces.Repository;
 using WorkFlow.Application.Common.Interfaces.Services;
@@ -17,17 +16,16 @@ using WorkFlow.Domain.Enums;
 
 namespace WorkFlow.Application.Features.WorkSpaces.Commands
 {
-    public record CreateWorkspaceCommand(CreateWorkspaceDto workSpace) : IRequest<Result<WorkSpaceDto>>;
+    public record CreateWorkspaceCommand(CreateWorkspaceDto WorkSpace) : IRequest<Result<WorkSpaceDto>>;
 
     public class CreateWorkspaceCommandValidator : AbstractValidator<CreateWorkspaceCommand>
     {
         public CreateWorkspaceCommandValidator()
         {
-            RuleFor(x => x.workSpace.Type)
-                .IsInEnum()
-                .WithMessage("Type không hợp lệ.");
+            RuleFor(x => x.WorkSpace.Type)
+                .IsInEnum().WithMessage("Type không hợp lệ.");
 
-            RuleFor(x => x.workSpace.Name)
+            RuleFor(x => x.WorkSpace.Name)
                 .NotEmpty().WithMessage("Tên không được để trống.")
                 .MaximumLength(255).WithMessage("Tên WorkSpace không được vượt quá 255 ký tự.");
         }
@@ -36,9 +34,10 @@ namespace WorkFlow.Application.Features.WorkSpaces.Commands
     public class CreateWorkspaceCommandHandler : IRequestHandler<CreateWorkspaceCommand, Result<WorkSpaceDto>>
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IRepository<WorkSpace, Guid> _workspaceRepository;
+        private readonly IRepository<WorkspaceMember, Guid> _workspaceMemberRepository;
         private readonly IRealtimeService _realtimeService;
         private readonly ICurrentUserService _currentUser;
-        private readonly IRepository<WorkSpace, Guid> _workSpaceRepository;
         private readonly IMapper _mapper;
 
         public CreateWorkspaceCommandHandler(
@@ -50,27 +49,40 @@ namespace WorkFlow.Application.Features.WorkSpaces.Commands
             _unitOfWork = unitOfWork;
             _realtimeService = realtimeService;
             _currentUser = currentUser;
-            _workSpaceRepository = unitOfWork.GetRepository<WorkSpace, Guid>();
             _mapper = mapper;
+
+            _workspaceRepository = unitOfWork.GetRepository<WorkSpace, Guid>();
+            _workspaceMemberRepository = unitOfWork.GetRepository<WorkspaceMember, Guid>();
         }
 
         public async Task<Result<WorkSpaceDto>> Handle(CreateWorkspaceCommand request, CancellationToken cancellationToken)
         {
-            var workSpace = WorkSpace.Create(request.workSpace.Name, request.workSpace.Type, request.workSpace.Background, request.workSpace.Description);
-
-            await _workSpaceRepository.AddAsync(workSpace);
-
-            await _unitOfWork.SaveChangesAsync();
-
-            var dto = _mapper.Map<WorkSpaceDto>(workSpace);
-
             if (_currentUser.UserId == null)
                 return Result<WorkSpaceDto>.Failure("Không xác định được người dùng.");
 
+            var userId = _currentUser.UserId.Value;
+
+            var workspace = WorkSpace.Create(
+                request.WorkSpace.Name,
+                request.WorkSpace.Type,
+                request.WorkSpace.Background,
+                request.WorkSpace.Description
+            );
+
+            await _workspaceRepository.AddAsync(workspace);
+
+            var ownerMember = WorkspaceMember.Create(workspace.Id, userId, WorkSpaceRole.Owner);
+            await _workspaceMemberRepository.AddAsync(ownerMember);
+
+            await _unitOfWork.SaveChangesAsync();
+
+            var dto = _mapper.Map<WorkSpaceDto>(workspace);
+
             await _realtimeService.SendToUserAsync(
-                _currentUser.UserId.Value,
+                userId,
                 WorkspaceEvents.Create,
-                dto);
+                dto
+            );
 
             return Result<WorkSpaceDto>.Success(dto);
         }
