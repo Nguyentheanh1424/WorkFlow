@@ -79,5 +79,11 @@ namespace WorkFlow.Domain.Entities
             ReminderEnabled = false;
             ReminderBeforeMinutes = null;
         }
+
+        public void UpdateLabels(int[]? labels)
+        {
+            Label = labels;
+        }
+
     }
 }

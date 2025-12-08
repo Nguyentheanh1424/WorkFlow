@@ -17,15 +17,9 @@ using WorkFlow.Domain.Entities;
 
 namespace WorkFlow.Application.Features.Lists.Commands
 {
-    // --------------------------------------------------------
-    // COMMAND
-    // --------------------------------------------------------
     public record MoveListToBoardCommand(Guid ListId, Guid TargetBoardId)
         : IRequest<Result<ListDto>>;
 
-    // --------------------------------------------------------
-    // VALIDATOR
-    // --------------------------------------------------------
     public class MoveListToBoardCommandValidator : AbstractValidator<MoveListToBoardCommand>
     {
         public MoveListToBoardCommandValidator()
@@ -38,9 +32,6 @@ namespace WorkFlow.Application.Features.Lists.Commands
         }
     }
 
-    // --------------------------------------------------------
-    // HANDLER
-    // --------------------------------------------------------
     public class MoveListToBoardCommandHandler
         : IRequestHandler<MoveListToBoardCommand, Result<ListDto>>
     {
