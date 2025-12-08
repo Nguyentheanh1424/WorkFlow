@@ -22,6 +22,8 @@
 
   <ItemGroup>
     <Folder Include="Features\Authentication\Queries\" />
+    <Folder Include="Features\WorkSpaceMembers\Dtos\" />
+    <Folder Include="Features\WorkSpaceMembers\Queries\" />
   </ItemGroup>
 
 </Project>
