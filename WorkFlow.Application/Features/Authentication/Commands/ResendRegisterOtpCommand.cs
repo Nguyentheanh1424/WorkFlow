@@ -8,7 +8,7 @@ using WorkFlow.Domain.Entities;
 
 namespace WorkFlow.Application.Features.Authentication.Commands
 {
-    public record class ResendRegisterOtpCommand(string email) : IRequest<Result<string>>;
+    public record class ResendRegisterOtpCommand(string email) : IRequest<Result>;
 
     public class ResendRegisterOtpCommandValidator : AbstractValidator<ResendRegisterOtpCommand>
     {
@@ -22,7 +22,7 @@ namespace WorkFlow.Application.Features.Authentication.Commands
         }
     }
 
-    public class ResendRegisterOtpCommandHandler : IRequestHandler<ResendRegisterOtpCommand, Result<string>>
+    public class ResendRegisterOtpCommandHandler : IRequestHandler<ResendRegisterOtpCommand, Result>
     {
         private readonly IOtpService _otpService;
         private readonly IEmailService _emailService;
@@ -43,20 +43,20 @@ namespace WorkFlow.Application.Features.Authentication.Commands
             _userRepository = _unitOfWork.GetRepository<User, Guid>();
         }
 
-        public async Task<Result<string>> Handle(ResendRegisterOtpCommand request, CancellationToken cancellationToken)
+        public async Task<Result> Handle(ResendRegisterOtpCommand request, CancellationToken cancellationToken)
         {
             var email = request.email.Trim().ToLower();
 
             bool userExists = await _userRepository.AnyAsync(u => u.Email == email);
             if (userExists)
-                return Result<string>.Failure(
+                return Result.Failure(
                     "Gửi lại OTP không thành công. Email này đã được sử dụng.");
 
             var cacheKey = $"pending-user:{email}";
             var pendingUser = await _cacheService.GetAsync<PendingUserCacheModel>(cacheKey);
 
             if (pendingUser == null)
-                return Result<string>.Failure(
+                return Result.Failure(
                     "Gửi lại OTP không thành công. Thông tin đăng ký không tồn tại hoặc đã hết hạn. Vui lòng đăng ký lại.");
 
             await _otpService.ValidateOtpRequestAsync(email);
@@ -72,7 +72,7 @@ namespace WorkFlow.Application.Features.Authentication.Commands
                 $"<p>Mã OTP của bạn có hiệu lực trong vòng 2 phút. Vui lòng sử dụng nhanh chóng!"
             );
 
-            return Result<string>.Success("Gửi lại OTP thành công. Vui lòng kiểm tra email để xác thực OTP");
+            return Result.Success("Gửi lại OTP thành công. Vui lòng kiểm tra email để xác thực OTP");
         }
     }
 }

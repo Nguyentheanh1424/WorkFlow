@@ -10,7 +10,7 @@ using WorkFlow.Application.Common.Exceptions;
 
 namespace WorkFlow.Application.Features.Authentication.Commands;
 public record ResetPasswordVerifyCommand(string Otp, string NewPassword)
-    : IRequest<Result<string>>;
+    : IRequest<Result>;
 
 public class ResetPasswordVerifyValidator : AbstractValidator<ResetPasswordVerifyCommand>
 {
@@ -27,7 +27,7 @@ public class ResetPasswordVerifyValidator : AbstractValidator<ResetPasswordVerif
 }
 
 public class ResetPasswordVerifyHandler
-    : IRequestHandler<ResetPasswordVerifyCommand, Result<string>>
+    : IRequestHandler<ResetPasswordVerifyCommand, Result>
 {
     private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _uow;
@@ -48,10 +48,10 @@ public class ResetPasswordVerifyHandler
         _authRepo = _uow.GetRepository<AccountAuth, Guid>();
     }
 
-    public async Task<Result<string>> Handle(ResetPasswordVerifyCommand request, CancellationToken ct)
+    public async Task<Result> Handle(ResetPasswordVerifyCommand request, CancellationToken ct)
     {
         if (_currentUserService.UserId == null)
-            return Result<string>.Failure("Không xác định được người dùng.");
+            return Result.Failure("Không xác định được người dùng.");
 
         var user = await _userRepo.GetByIdAsync(_currentUserService.UserId.Value)
             ?? throw new NotFoundException("Người dùng không tồn tại.");
@@ -62,17 +62,17 @@ public class ResetPasswordVerifyHandler
 
         bool isSame = PasswordHasher.Verify(request.NewPassword, account.PasswordHash, account.Salt);
         if (isSame)
-            return Result<string>.Failure("Mật khẩu mới không được trùng mật khẩu cũ.");
+            return Result.Failure("Mật khẩu mới không được trùng mật khẩu cũ.");
 
         var isValid = await _otp.VerifyAsync(user.Id.ToString(), request.Otp);
         if (!isValid)
-            return Result<string>.Failure("OTP không hợp lệ hoặc đã hết hạn.");
+            return Result.Failure("OTP không hợp lệ hoặc đã hết hạn.");
 
         var (hash, salt) = PasswordHasher.Hash(request.NewPassword);
         account.SetPassword(hash, salt);
 
         await _uow.SaveChangesAsync(ct);
 
-        return Result<string>.Success("Đổi mật khẩu thành công.");
+        return Result.Success("Đổi mật khẩu thành công.");
     }
 }

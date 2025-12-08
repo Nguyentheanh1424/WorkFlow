@@ -7,13 +7,13 @@ using WorkFlow.Domain.Entities;
 
 namespace WorkFlow.Application.Features.Authentication.Commands
 {
-    public class LogoutCommand : IRequest<Result<string>>
+    public class LogoutCommand : IRequest<Result>
     {
         public string Provider { get; set; } = default!;
         public string RefreshToken { get; set; } = default!;
     }
 
-    public class LogoutCommandHandler : IRequestHandler<LogoutCommand, Result<string>>
+    public class LogoutCommandHandler : IRequestHandler<LogoutCommand, Result>
     {
         private readonly IRepository<AccountAuth, Guid> _authRepository;
         private readonly IUnitOfWork _uow;
@@ -25,7 +25,7 @@ namespace WorkFlow.Application.Features.Authentication.Commands
             _uow = uow;
             _authRepository = _uow.GetRepository<AccountAuth, Guid>();
         }
-        public async Task<Result<string>> Handle(LogoutCommand request, CancellationToken cancellationToken)
+        public async Task<Result> Handle(LogoutCommand request, CancellationToken cancellationToken)
         {
             var auth = await _authRepository.FirstOrDefaultAsync(a =>
                 a.Provider == request.Provider &&
@@ -36,7 +36,7 @@ namespace WorkFlow.Application.Features.Authentication.Commands
             await _authRepository.UpdateAsync(auth);
             await _uow.SaveChangesAsync(cancellationToken);
 
-            return Result<string>.Success("Đăng xuất thành công");
+            return Result.Success("Đăng xuất thành công");
         }
     }
 }

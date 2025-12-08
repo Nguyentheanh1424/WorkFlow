@@ -8,10 +8,10 @@ using WorkFlow.Application.Common.Exceptions;
 namespace WorkFlow.Application.Features.Authentication.Commands;
 
 public record ForgotPasswordSendOtpCommand(string Email)
-    : IRequest<Result<string>>;
+    : IRequest<Result>;
 
 public class ForgotPasswordSendOtpHandler
-    : IRequestHandler<ForgotPasswordSendOtpCommand, Result<string>>
+    : IRequestHandler<ForgotPasswordSendOtpCommand, Result>
 {
     private readonly IUnitOfWork _uow;
     private readonly IRepository<User, Guid> _userRepo;
@@ -32,7 +32,7 @@ public class ForgotPasswordSendOtpHandler
         _authRepo = _uow.GetRepository<AccountAuth, Guid>();
     }
 
-    public async Task<Result<string>> Handle(ForgotPasswordSendOtpCommand request, CancellationToken ct)
+    public async Task<Result> Handle(ForgotPasswordSendOtpCommand request, CancellationToken ct)
     {
         var user = await _userRepo.FirstOrDefaultAsync(x => x.Email == request.Email)
             ?? throw new NotFoundException("Email không tồn tại.");
@@ -45,6 +45,6 @@ public class ForgotPasswordSendOtpHandler
 
         await _email.SendAsync(user.Email, "OTP đặt lại mật khẩu", $"OTP của bạn: {otp}");
 
-        return Result<string>.Success("OTP đã được gửi.");
+        return Result.Success("OTP đã được gửi.");
     }
 }

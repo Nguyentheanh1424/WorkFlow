@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WorkFlow.Application.Common.Exceptions;
+﻿using WorkFlow.Application.Common.Exceptions;
 using WorkFlow.Application.Common.Interfaces.Repository;
 using WorkFlow.Application.Common.Interfaces.Services;
 using WorkFlow.Domain.Entities;
@@ -110,6 +105,9 @@ namespace WorkFlow.Application.Common.Services
             if (await IsBoardEditorOrOwner(boardId, userId))
                 return;
 
+            if (await IsAssignee(cardId, userId))
+                throw new ForbiddenAccessException("Assignee không có quyền gán người cho Card.");
+
             throw new ForbiddenAccessException("Bạn không có quyền gán người vào Card.");
         }
 
@@ -120,8 +118,18 @@ namespace WorkFlow.Application.Common.Services
 
         public async Task EnsureCanDeleteAsync(Guid cardId, Guid userId)
         {
-            await EnsureCanEditAsync(cardId, userId);
+            var (boardId, workspaceId) = await GetBoardInfo(cardId);
+
+            if (await IsWorkspaceAdminOrOwner(workspaceId, userId))
+                return;
+
+            if (await IsBoardEditorOrOwner(boardId, userId))
+                return;
+
+            if (await IsAssignee(cardId, userId))
+                throw new ForbiddenAccessException("Assignee không có quyền xoá Card.");
+
+            throw new ForbiddenAccessException("Bạn không có quyền xoá Card.");
         }
     }
-
 }

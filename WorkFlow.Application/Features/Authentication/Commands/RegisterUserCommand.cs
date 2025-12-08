@@ -10,7 +10,7 @@ using WorkFlow.Domain.Entities;
 
 namespace WorkFlow.Application.Features.Authentication.Commands
 {
-    public record RegisterUserCommand(RegisterUserDto data) : IRequest<Result<string>>;
+    public record RegisterUserCommand(RegisterUserDto data) : IRequest<Result>;
 
     public class RegisterUserCommandValidator : AbstractValidator<RegisterUserCommand>
     {
@@ -38,7 +38,7 @@ namespace WorkFlow.Application.Features.Authentication.Commands
         }
     }
 
-    public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, Result<string>>
+    public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, Result>
     {
         private readonly ICacheService _cacheService;
         private readonly IEmailService _emailService;
@@ -59,13 +59,13 @@ namespace WorkFlow.Application.Features.Authentication.Commands
             _userRepository = _unitOfWork.GetRepository<User, Guid>();
         }
 
-        public async Task<Result<string>> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
+        public async Task<Result> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
         {
             var email = request.data.Email.Trim().ToLower();
 
             bool userExists = await _userRepository.AnyAsync(u => u.Email == email);
             if (userExists)
-                return Result<string>.Failure(
+                return Result.Failure(
                     "Email này đã được sử dụng.");
 
             await _otpService.ValidateOtpRequestAsync(email);
@@ -91,7 +91,7 @@ namespace WorkFlow.Application.Features.Authentication.Commands
                 $"<p>Mã OTP của bạn là: <strong>{otp}</strong></p>"
             );
 
-            return Result<string>.Success("Đăng ký thành công. Vui lòng kiểm tra email để xác thực OTP.");
+            return Result.Success("Đăng ký thành công. Vui lòng kiểm tra email để xác thực OTP.");
         }
     }
 }

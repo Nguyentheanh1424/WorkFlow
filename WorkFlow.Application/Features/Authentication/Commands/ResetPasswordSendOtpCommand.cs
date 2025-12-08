@@ -7,10 +7,10 @@ using WorkFlow.Domain.Entities;
 using WorkFlow.Application.Common.Exceptions;
 
 namespace WorkFlow.Application.Features.Authentication.Commands;
-public record ResetPasswordSendOtpCommand() : IRequest<Result<string>>;
+public record ResetPasswordSendOtpCommand() : IRequest<Result>;
 
 public class ResetPasswordSendOtpHandler
-    : IRequestHandler<ResetPasswordSendOtpCommand, Result<string>>
+    : IRequestHandler<ResetPasswordSendOtpCommand, Result>
 {
     private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _uow;
@@ -34,10 +34,10 @@ public class ResetPasswordSendOtpHandler
         _authRepo = _uow.GetRepository<AccountAuth, Guid>();
     }
 
-    public async Task<Result<string>> Handle(ResetPasswordSendOtpCommand request, CancellationToken ct)
+    public async Task<Result> Handle(ResetPasswordSendOtpCommand request, CancellationToken ct)
     {
         if (_currentUserService.UserId == null)
-            return Result<string>.Failure("Không xác định được người dùng.");
+            return Result.Failure("Không xác định được người dùng.");
 
         var user = await _userRepo.GetByIdAsync(_currentUserService.UserId.Value)
             ?? throw new NotFoundException("Người dùng không tồn tại.");
@@ -49,6 +49,6 @@ public class ResetPasswordSendOtpHandler
         var otp = await _otp.GenerateAsync(user.Id.ToString());
         await _email.SendAsync(user.Email, "Mã OTP đặt lại mật khẩu", $"OTP của bạn là: {otp}");
 
-        return Result<string>.Success("OTP đã được gửi đến email.");
+        return Result.Success("OTP đã được gửi đến email.");
     }
 }

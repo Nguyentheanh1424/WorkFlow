@@ -46,25 +46,27 @@ namespace WorkFlow.Application.Features.BoardMembers.Commands
             if (_currentUser.UserId == null)
                 throw new ForbiddenAccessException("Không xác định được người dùng.");
 
-            var userId = _currentUser.UserId.Value;
+            var currentUserId = _currentUser.UserId.Value;
 
             var member = await _boardMemberRepository.FirstOrDefaultAsync(
                 x => x.BoardId == request.BoardId && x.UserId == request.UserId
             ) ?? throw new NotFoundException("User không thuộc board.");
 
-            bool isSelfRemoving = request.UserId == userId;
+            bool isSelfRemoving = request.UserId == currentUserId;
 
             if (!isSelfRemoving)
             {
-                await _permission.Board.EnsureOwnerAsync(request.BoardId, userId);
+                await _permission.Board.EnsureCanModifyMemberRoleAsync(
+                    request.BoardId,
+                    currentUserId,
+                    request.UserId
+                );
             }
 
             if (member.Role == BoardRole.Owner)
             {
-                bool isLastOwner = await _permission.Board.IsLastOwnerAsync(request.BoardId, member.UserId);
-
-                if (isLastOwner)
-                    return Result<bool>.Failure("Không thể xoá Owner cuối cùng.");
+                if (await _permission.Board.IsLastOwnerAsync(request.BoardId, member.UserId))
+                    return Result<bool>.Failure("Không thể xoá Owner cuối cùng của Board.");
             }
 
             await _boardMemberRepository.DeleteAsync(member);

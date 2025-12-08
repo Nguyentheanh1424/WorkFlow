@@ -9,7 +9,7 @@ using WorkFlow.Domain.Entities;
 
 namespace WorkFlow.Application.Features.Authentication.Commands
 {
-    public record class VerifyRegisterOtpCommand(VerifyRegisterOtpDto data) : IRequest<Result<string>>;
+    public record class VerifyRegisterOtpCommand(VerifyRegisterOtpDto data) : IRequest<Result>;
 
     public class VerifyRegisterOtpCommandValidator : AbstractValidator<VerifyRegisterOtpCommand>
     {
@@ -26,7 +26,7 @@ namespace WorkFlow.Application.Features.Authentication.Commands
         }
     }
 
-    public class VerifyRegisterOtpCommandHandler : IRequestHandler<VerifyRegisterOtpCommand, Result<string>>
+    public class VerifyRegisterOtpCommandHandler : IRequestHandler<VerifyRegisterOtpCommand, Result>
     {
         private readonly IOtpService _otpService;
         private readonly ICacheService _cacheService;
@@ -46,7 +46,7 @@ namespace WorkFlow.Application.Features.Authentication.Commands
             _accountAuthRepository = _unitOfWork.GetRepository<AccountAuth, Guid>();
         }
 
-        public async Task<Result<string>> Handle(VerifyRegisterOtpCommand request, CancellationToken cancellationToken)
+        public async Task<Result> Handle(VerifyRegisterOtpCommand request, CancellationToken cancellationToken)
         {
             var email = request.data.Email.Trim().ToLower();
 
@@ -54,13 +54,13 @@ namespace WorkFlow.Application.Features.Authentication.Commands
             var isValidOtp = await _otpService.VerifyAsync(key, request.data.Otp);
 
             if (!isValidOtp)
-                return Result<string>.Failure("Mã OTP không đúng hoặc đã hết hạn.");
+                return Result.Failure("Mã OTP không đúng hoặc đã hết hạn.");
 
             var cacheKey = $"pending-user:{email}";
             var pendingUser = await _cacheService.GetAsync<PendingUserCacheModel>(cacheKey);
 
             if (pendingUser == null)
-                return Result<string>.Failure(
+                return Result.Failure(
                     "Thông tin đăng ký không tồn tại hoặc đã hết hạn. Vui lòng đăng ký lại.");
 
             var user = new User(
@@ -82,7 +82,7 @@ namespace WorkFlow.Application.Features.Authentication.Commands
 
             await _cacheService.RemoveAsync(cacheKey);
 
-            return Result<string>.Success("Xác thực OTP thành công. Tài khoản đã được tạo.");
+            return Result.Success("Xác thực OTP thành công. Tài khoản đã được tạo.");
         }
     }
 }

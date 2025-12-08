@@ -26,6 +26,14 @@ public class BoardPermissionService : IBoardPermissionService
         return role is WorkSpaceRole.Admin or WorkSpaceRole.Owner;
     }
 
+    private int Rank(BoardRole role) => role switch
+    {
+        BoardRole.Owner => 3,
+        BoardRole.Editor => 2,
+        BoardRole.Viewer => 1,
+        _ => 0
+    };
+
     public async Task<BoardRole?> GetRoleAsync(Guid boardId, Guid userId)
     {
         var member = await _boardMemberRepository.FirstOrDefaultAsync(
@@ -39,6 +47,7 @@ public class BoardPermissionService : IBoardPermissionService
         var board = await _boardRepository.GetByIdAsync(boardId)
             ?? throw new NotFoundException("Board không tồn tại.");
 
+        // Workspace Owner/Admin luôn pass
         if (await IsWorkspaceAdminOrOwner(board.WorkspaceId, userId))
             return;
 
@@ -79,6 +88,44 @@ public class BoardPermissionService : IBoardPermissionService
 
         if (role != BoardRole.Owner)
             throw new ForbiddenAccessException("Bạn không có quyền quản trị Board.");
+    }
+
+    public async Task EnsureCanAssignRoleAsync(Guid boardId, Guid currentUserId, BoardRole newRole)
+    {
+        var board = await _boardRepository.GetByIdAsync(boardId)
+            ?? throw new NotFoundException("Board không tồn tại.");
+
+        // Workspace Owner/Admin có quyền assign mọi role
+        if (await IsWorkspaceAdminOrOwner(board.WorkspaceId, currentUserId))
+            return;
+
+        var currentRole = await GetRoleAsync(boardId, currentUserId)
+            ?? throw new ForbiddenAccessException("Bạn không thuộc Board.");
+
+        if (Rank(newRole) > Rank(currentRole))
+            throw new ForbiddenAccessException("Bạn không thể gán role cao hơn quyền hiện tại của bạn.");
+    }
+
+    public async Task EnsureCanModifyMemberRoleAsync(Guid boardId, Guid currentUserId, Guid targetUserId)
+    {
+        var board = await _boardRepository.GetByIdAsync(boardId)
+            ?? throw new NotFoundException("Board không tồn tại.");
+
+        // Workspace Owner/Admin có quyền chỉnh sửa mọi thành viên
+        if (await IsWorkspaceAdminOrOwner(board.WorkspaceId, currentUserId))
+            return;
+
+        var currentRole = await GetRoleAsync(boardId, currentUserId)
+            ?? throw new ForbiddenAccessException("Bạn không thuộc Board.");
+
+        var targetRole = await GetRoleAsync(boardId, targetUserId);
+
+        // nếu target chưa có trong board => không cần check
+        if (targetRole == null)
+            return;
+
+        if (Rank(targetRole.Value) > Rank(currentRole))
+            throw new ForbiddenAccessException("Bạn không thể chỉnh sửa thành viên có quyền cao hơn bạn.");
     }
 
     public async Task<bool> IsLastOwnerAsync(Guid boardId, Guid userId)

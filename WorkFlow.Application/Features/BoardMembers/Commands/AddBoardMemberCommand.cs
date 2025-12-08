@@ -29,7 +29,7 @@ namespace WorkFlow.Application.Features.BoardMembers.Commands
     }
 
     public class AddBoardMemberCommandHandler
-        : IRequestHandler<AddBoardMemberCommand, Result<BoardMemberDto>>
+    : IRequestHandler<AddBoardMemberCommand, Result<BoardMemberDto>>
     {
         private readonly IRepository<BoardMember, Guid> _boardMemberRepository;
         private readonly IRepository<Board, Guid> _boardRepository;
@@ -65,7 +65,11 @@ namespace WorkFlow.Application.Features.BoardMembers.Commands
             var board = await _boardRepository.GetByIdAsync(request.BoardId)
                 ?? throw new NotFoundException("Board không tồn tại.");
 
-            await _permission.Board.EnsureOwnerAsync(board.Id, currentUserId);
+            await _permission.Board.EnsureCanAssignRoleAsync(
+                board.Id,
+                currentUserId,
+                request.Role
+            );
 
             await _permission.Workspace.EnsureMemberAsync(board.WorkspaceId, request.UserId);
 
@@ -101,4 +105,5 @@ namespace WorkFlow.Application.Features.BoardMembers.Commands
             return Result<BoardMemberDto>.Success(dto);
         }
     }
+
 }

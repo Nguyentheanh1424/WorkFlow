@@ -10,7 +10,7 @@ using WorkFlow.Application.Common.Exceptions;
 namespace WorkFlow.Application.Features.Authentication.Commands;
 
 public record ForgotPasswordVerifyCommand(string Email, string Otp, string NewPassword)
-    : IRequest<Result<string>>;
+    : IRequest<Result>;
 
 public class ForgotPasswordVerifyValidator : AbstractValidator<ForgotPasswordVerifyCommand>
 {
@@ -27,7 +27,7 @@ public class ForgotPasswordVerifyValidator : AbstractValidator<ForgotPasswordVer
 }
 
 public class ForgotPasswordVerifyHandler
-    : IRequestHandler<ForgotPasswordVerifyCommand, Result<string>>
+    : IRequestHandler<ForgotPasswordVerifyCommand, Result>
 {
     private readonly IUnitOfWork _uow;
     private readonly IRepository<User, Guid> _userRepo;
@@ -45,7 +45,7 @@ public class ForgotPasswordVerifyHandler
         _authRepo = _uow.GetRepository<AccountAuth, Guid>();
     }
 
-    public async Task<Result<string>> Handle(ForgotPasswordVerifyCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(ForgotPasswordVerifyCommand request, CancellationToken cancellationToken)
     {
         var user = await _userRepo.FirstOrDefaultAsync(x => x.Email == request.Email)
             ?? throw new NotFoundException("Email không tồn tại.");
@@ -56,13 +56,13 @@ public class ForgotPasswordVerifyHandler
 
         var isValid = await _otp.VerifyAsync(user.Id.ToString(), request.Otp);
         if (!isValid)
-            return Result<string>.Failure("OTP không hợp lệ hoặc đã hết hạn.");
+            return Result.Failure("OTP không hợp lệ hoặc đã hết hạn.");
 
         var (hash, salt) = PasswordHasher.Hash(request.NewPassword);
         account.SetPassword(hash, salt);
 
         await _uow.SaveChangesAsync(cancellationToken);
 
-        return Result<string>.Success("Khôi phục mật khẩu thành công.");
+        return Result.Success("Khôi phục mật khẩu thành công.");
     }
 }
