@@ -13,9 +13,13 @@
 
         public static Result Success() => new(true, null);
 
+        public static Result Success(string message) => new(true, message);
+
         public static Result Failure(string error)
             => new(false, error);
-        public static Result Success(string message) => new(true, message);
+
+        public static Result<T> Success<T>(T value)
+            => Result<T>.Success(value);
     }
 
     public class Result<T>
@@ -32,18 +36,12 @@
         }
 
         public static Result<T> Success(T value)
-        {
-            return new Result<T>(true, value, null);
-        }
+            => new(true, value, null);
 
         public static Result<T> Success(T value, string message)
-        {
-            return new Result<T>(true, value, message);   
-        }
+            => new(true, value, message);
 
         public static Result<T> Failure(string errorMessage)
-        {
-            return new Result<T>(false, default, errorMessage);
-        }
+            => new(false, default, errorMessage);
     }
 }
