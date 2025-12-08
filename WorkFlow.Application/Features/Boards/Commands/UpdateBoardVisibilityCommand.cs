@@ -14,71 +14,75 @@ using WorkFlow.Application.Common.Interfaces.Services;
 using WorkFlow.Application.Features.Boards.Dtos;
 using WorkFlow.Domain.Common;
 using WorkFlow.Domain.Entities;
+using WorkFlow.Domain.Enums;
 
 namespace WorkFlow.Application.Features.Boards.Commands
 {
-    public record UpdateBoardTitleCommand(Guid BoardId, string Title) : IRequest<Result<BoardDto>>;
+    public record UpdateBoardVisibilityCommand(Guid BoardId, VisibilityBoard Visibility)
+        : IRequest<Result>;
 
-    public class UpdateBoardTitleCommandValidator : AbstractValidator<UpdateBoardTitleCommand>
+    public class UpdateBoardVisibilityCommandValidator
+        : AbstractValidator<UpdateBoardVisibilityCommand>
     {
-        public UpdateBoardTitleCommandValidator()
+        public UpdateBoardVisibilityCommandValidator()
         {
             RuleFor(x => x.BoardId)
                 .NotEmpty().WithMessage("BoardId không được để trống.");
 
-            RuleFor(x => x.Title)
-                .NotEmpty().WithMessage("Tên board không được để trống.")
-                .MaximumLength(255).WithMessage("Tên board không được vượt quá 255 ký tự.");
+            RuleFor(x => x.Visibility)
+                .IsInEnum()
+                .WithMessage("Visibility không hợp lệ.");
         }
     }
 
-    public class UpdateBoardTitleCommandHandler : IRequestHandler<UpdateBoardTitleCommand, Result<BoardDto>>
+    public class UpdateBoardVisibilityCommandHandler
+        : IRequestHandler<UpdateBoardVisibilityCommand, Result>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IRepository<Board, Guid> _boardRepository;
-        private readonly IRealtimeService _realtimeService;
+        private readonly IBoardPermissionService _permission;
         private readonly ICurrentUserService _currentUser;
-        private readonly IPermissionService _permission;
+        private readonly IRealtimeService _realtime;
         private readonly IMapper _mapper;
 
-        public UpdateBoardTitleCommandHandler(
+        public UpdateBoardVisibilityCommandHandler(
             IUnitOfWork unitOfWork,
-            IRealtimeService realtimeService,
+            IBoardPermissionService permission,
             ICurrentUserService currentUser,
-            IPermissionService permission,
+            IRealtimeService realtime,
             IMapper mapper)
         {
             _unitOfWork = unitOfWork;
-            _realtimeService = realtimeService;
-            _currentUser = currentUser;
-            _permission = permission;
-            _mapper = mapper;
-
             _boardRepository = unitOfWork.GetRepository<Board, Guid>();
+            _permission = permission;
+            _currentUser = currentUser;
+            _realtime = realtime;
+            _mapper = mapper;
         }
 
-        public async Task<Result<BoardDto>> Handle(UpdateBoardTitleCommand request, CancellationToken cancellationToken)
+        public async Task<Result> Handle(UpdateBoardVisibilityCommand request, CancellationToken cancellationToken)
         {
             if (_currentUser.UserId == null)
-                return Result<BoardDto>.Failure("Không xác định được người dùng.");
+                return Result.Failure("Không xác định được người dùng.");
 
             var userId = _currentUser.UserId.Value;
 
             var board = await _boardRepository.GetByIdAsync(request.BoardId)
                 ?? throw new NotFoundException("Board không tồn tại.");
 
-            await _permission.Board.EnsureEditorAsync(board.Id, userId);
+            await _permission.EnsureOwnerAsync(board.Id, userId);
 
-            board.Rename(request.Title);
+            board.ChangeVisibility(request.Visibility);
 
+            await _boardRepository.UpdateAsync(board);
             await _unitOfWork.SaveChangesAsync();
 
             var dto = _mapper.Map<BoardDto>(board);
 
-            await _realtimeService.SendToBoardAsync(board.Id, BoardEvents.Updated, dto);
-            await _realtimeService.SendToWorkspaceAsync(board.WorkspaceId, BoardEvents.Updated, dto);
+            await _realtime.SendToBoardAsync(board.Id, BoardEvents.Updated, dto);
+            await _realtime.SendToWorkspaceAsync(board.WorkspaceId, BoardEvents.Updated, dto);
 
-            return Result<BoardDto>.Success(dto);
+            return Result.Success();
         }
     }
 }

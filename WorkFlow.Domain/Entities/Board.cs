@@ -20,6 +20,7 @@ namespace WorkFlow.Domain.Entities
         public string? Description { get; set; }
 
         public bool Pinned { get; set; }
+        public bool IsArchived { get; set; }
 
         protected Board() { }
 
@@ -34,7 +35,8 @@ namespace WorkFlow.Domain.Entities
                 Visibility = visibility,
                 Background = background,
                 Description = description,
-                Pinned = false
+                Pinned = false,
+                IsArchived = false
             };
         }
 
@@ -61,5 +63,8 @@ namespace WorkFlow.Domain.Entities
         public void Pin() => Pinned = true;
 
         public void Unpin() => Pinned = false;
+
+        public void Archive() => IsArchived = true;
+        public void Restore() => IsArchived = false;
     }
 }

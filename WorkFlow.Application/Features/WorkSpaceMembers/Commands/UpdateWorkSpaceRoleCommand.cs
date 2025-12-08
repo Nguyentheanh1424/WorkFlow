@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WorkFlow.Application.Common.Constants.EventNames;
 using WorkFlow.Application.Common.Exceptions;
 using WorkFlow.Application.Common.Interfaces.Auth;
 using WorkFlow.Application.Common.Interfaces.Repository;
@@ -39,16 +40,19 @@ namespace WorkFlow.Application.Features.WorkSpaceMembers.Commands
         private readonly IRepository<WorkspaceMember, Guid> _memberRepository;
         private readonly IPermissionService _permission;
         private readonly ICurrentUserService _currentUser;
+        private readonly IRealtimeService _realtimeService;
 
         public UpdateRoleCommandHandler(
             IUnitOfWork unitOfWork,
             IPermissionService permission,
-            ICurrentUserService currentUser)
+            ICurrentUserService currentUser,
+            IRealtimeService realtimeService)
         {
             _unitOfWork = unitOfWork;
             _memberRepository = unitOfWork.GetRepository<WorkspaceMember, Guid>();
             _permission = permission;
             _currentUser = currentUser;
+            _realtimeService = realtimeService;
         }
 
         public async Task<Result> Handle(UpdateWorkSpaceRoleCommand request, CancellationToken cancellationToken)
@@ -87,8 +91,19 @@ namespace WorkFlow.Application.Features.WorkSpaceMembers.Commands
 
             member.Role = request.NewRole;
 
+            var payload = new
+            {
+                WorkSpaceId = request.WorkspaceId,
+                TagetUserId = request.UserId,
+                NewRole = request.NewRole,
+                Status = false,
+            };
+
             await _memberRepository.UpdateAsync(member);
             await _unitOfWork.SaveChangesAsync();
+
+            await _realtimeService.SendToUserAsync(request.UserId, WorkspaceEvents.MemberUpdateRole, payload);
+            await _realtimeService.SendToWorkspaceAsync(request.WorkspaceId, WorkspaceEvents.MemberUpdateRole, payload);
 
             return Result.Success("Cập nhật quyền thành công.");
         }

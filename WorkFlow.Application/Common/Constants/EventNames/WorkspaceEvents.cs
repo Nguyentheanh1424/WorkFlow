@@ -14,6 +14,7 @@ namespace WorkFlow.Application.Common.Constants.EventNames
 
         public const string MemberAdded = "Workspace.Member.Added";
         public const string MemberRemoved = "Workspace.Member.Removed";
+        public const string MemberUpdateRole = "Workspace.Member.Update.Role";
 
         public const string BoardAdded = "Workspace.Board.Added";
         public const string BoardRemoved = "Workspace.Board.Removed";

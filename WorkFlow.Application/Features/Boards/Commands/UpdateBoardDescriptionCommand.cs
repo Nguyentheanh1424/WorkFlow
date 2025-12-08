@@ -17,60 +17,62 @@ using WorkFlow.Domain.Entities;
 
 namespace WorkFlow.Application.Features.Boards.Commands
 {
-    public record UpdateBoardTitleCommand(Guid BoardId, string Title) : IRequest<Result<BoardDto>>;
+    public record UpdateBoardDescriptionCommand(Guid BoardId, string Description)
+        : IRequest<Result>;
 
-    public class UpdateBoardTitleCommandValidator : AbstractValidator<UpdateBoardTitleCommand>
+    public class UpdateBoardDescriptionCommandValidator
+        : AbstractValidator<UpdateBoardDescriptionCommand>
     {
-        public UpdateBoardTitleCommandValidator()
+        public UpdateBoardDescriptionCommandValidator()
         {
             RuleFor(x => x.BoardId)
                 .NotEmpty().WithMessage("BoardId không được để trống.");
 
-            RuleFor(x => x.Title)
-                .NotEmpty().WithMessage("Tên board không được để trống.")
-                .MaximumLength(255).WithMessage("Tên board không được vượt quá 255 ký tự.");
+            RuleFor(x => x.Description)
+                .MaximumLength(2000)
+                .WithMessage("Mô tả không được vượt quá 2000 ký tự.");
         }
     }
-
-    public class UpdateBoardTitleCommandHandler : IRequestHandler<UpdateBoardTitleCommand, Result<BoardDto>>
+    public class UpdateBoardDescriptionCommandHandler
+        : IRequestHandler<UpdateBoardDescriptionCommand, Result>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IRepository<Board, Guid> _boardRepository;
-        private readonly IRealtimeService _realtimeService;
+        private readonly IBoardPermissionService _permission;
         private readonly ICurrentUserService _currentUser;
-        private readonly IPermissionService _permission;
+        private readonly IRealtimeService _realtimeService;
         private readonly IMapper _mapper;
 
-        public UpdateBoardTitleCommandHandler(
+        public UpdateBoardDescriptionCommandHandler(
             IUnitOfWork unitOfWork,
-            IRealtimeService realtimeService,
+            IBoardPermissionService permission,
             ICurrentUserService currentUser,
-            IPermissionService permission,
+            IRealtimeService realtime,
             IMapper mapper)
         {
             _unitOfWork = unitOfWork;
-            _realtimeService = realtimeService;
-            _currentUser = currentUser;
-            _permission = permission;
-            _mapper = mapper;
-
             _boardRepository = unitOfWork.GetRepository<Board, Guid>();
+            _permission = permission;
+            _currentUser = currentUser;
+            _realtimeService = realtime;
+            _mapper = mapper;
         }
 
-        public async Task<Result<BoardDto>> Handle(UpdateBoardTitleCommand request, CancellationToken cancellationToken)
+        public async Task<Result> Handle(UpdateBoardDescriptionCommand request, CancellationToken cancellationToken)
         {
             if (_currentUser.UserId == null)
-                return Result<BoardDto>.Failure("Không xác định được người dùng.");
+                return Result.Failure("Không xác định được người dùng.");
 
             var userId = _currentUser.UserId.Value;
 
             var board = await _boardRepository.GetByIdAsync(request.BoardId)
                 ?? throw new NotFoundException("Board không tồn tại.");
 
-            await _permission.Board.EnsureEditorAsync(board.Id, userId);
+            await _permission.EnsureEditorAsync(board.Id, userId);
 
-            board.Rename(request.Title);
+            board.SetDescription(request.Description);
 
+            await _boardRepository.UpdateAsync(board);
             await _unitOfWork.SaveChangesAsync();
 
             var dto = _mapper.Map<BoardDto>(board);
@@ -78,7 +80,7 @@ namespace WorkFlow.Application.Features.Boards.Commands
             await _realtimeService.SendToBoardAsync(board.Id, BoardEvents.Updated, dto);
             await _realtimeService.SendToWorkspaceAsync(board.WorkspaceId, BoardEvents.Updated, dto);
 
-            return Result<BoardDto>.Success(dto);
+            return Result.Success();
         }
     }
 }

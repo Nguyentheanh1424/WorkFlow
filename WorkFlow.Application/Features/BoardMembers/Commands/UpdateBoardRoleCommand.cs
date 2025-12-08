@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WorkFlow.Application.Common.Constants.EventNames;
 using WorkFlow.Application.Common.Exceptions;
 using WorkFlow.Application.Common.Interfaces.Auth;
 using WorkFlow.Application.Common.Interfaces.Repository;
@@ -37,16 +38,19 @@ namespace WorkFlow.Application.Features.BoardMembers.Commands
         private readonly IRepository<BoardMember, Guid> _boardMemberRepository;
         private readonly IPermissionService _permission;
         private readonly ICurrentUserService _currentUser;
+        private readonly IRealtimeService _realtime;
 
         public UpdateBoardRoleCommandHandler(
             IUnitOfWork unitOfWork,
             IPermissionService permission,
-            ICurrentUserService currentUser)
+            ICurrentUserService currentUser,
+            IRealtimeService realtime)
         {
             _unitOfWork = unitOfWork;
             _boardMemberRepository = unitOfWork.GetRepository<BoardMember, Guid>();
             _permission = permission;
             _currentUser = currentUser;
+            _realtime = realtime;
         }
 
         public async Task<Result> Handle(UpdateBoardRoleCommand request, CancellationToken cancellationToken)
@@ -85,6 +89,12 @@ namespace WorkFlow.Application.Features.BoardMembers.Commands
 
             await _boardMemberRepository.UpdateAsync(member);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            await _realtime.SendToUserAsync(
+                request.UserId,
+                BoardEvents.MemberUpdateRole,
+                new { request.BoardId }
+            );
 
             return Result.Success("Cập nhật quyền thành viên Board thành công.");
         }

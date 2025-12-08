@@ -21,5 +21,6 @@ namespace WorkFlow.Application.Features.Boards.Dtos
         public string? Description { get; set; }
 
         public bool Pinned { get; set; }
+        public bool IsArchived { get; set; }
     }
 }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WorkFlow.Application.Common.Constants.EventNames;
 using WorkFlow.Application.Common.Exceptions;
 using WorkFlow.Application.Common.Interfaces.Auth;
 using WorkFlow.Application.Common.Interfaces.Repository;
@@ -39,16 +40,19 @@ namespace WorkFlow.Application.Features.WorkSpaceMembers.Commands
         private readonly IRepository<WorkspaceMember, Guid> _memberRepository;
         private readonly IPermissionService _permission;
         private readonly ICurrentUserService _currentUser;
+        private readonly IRealtimeService _realtimeService;
 
         public AddWorkSpaceMemberCommandHandler(
             IUnitOfWork unitOfWork,
             IPermissionService permission,
-            ICurrentUserService currentUser)
+            ICurrentUserService currentUser,
+            IRealtimeService realtimeService)
         {
             _unitOfWork = unitOfWork;
             _memberRepository = unitOfWork.GetRepository<WorkspaceMember, Guid>();
             _permission = permission;
             _currentUser = currentUser;
+            _realtimeService = realtimeService;
         }
 
         public async Task<Result> Handle(AddWorkSpaceMemberCommand request, CancellationToken cancellationToken)
@@ -81,6 +85,9 @@ namespace WorkFlow.Application.Features.WorkSpaceMembers.Commands
 
             await _memberRepository.AddAsync(member);
             await _unitOfWork.SaveChangesAsync();
+
+            await _realtimeService.SendToUserAsync(request.UserId, WorkspaceEvents.MemberAdded, member);
+            await _realtimeService.SendToWorkspaceAsync(request.WorkspaceId, WorkspaceEvents.MemberAdded, member);
 
             return Result.Success("Thêm thành viên thành công.");
         }

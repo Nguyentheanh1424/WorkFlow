@@ -1,10 +1,12 @@
-﻿using FluentValidation;
+﻿using AutoMapper.Execution;
+using FluentValidation;
 using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WorkFlow.Application.Common.Constants.EventNames;
 using WorkFlow.Application.Common.Exceptions;
 using WorkFlow.Application.Common.Interfaces.Auth;
 using WorkFlow.Application.Common.Interfaces.Repository;
@@ -37,16 +39,19 @@ namespace WorkFlow.Application.Features.WorkSpaceMembers.Commands
         private readonly IRepository<WorkspaceMember, Guid> _memberRepository;
         private readonly IPermissionService _permission;
         private readonly ICurrentUserService _currentUser;
+        private readonly IRealtimeService _realtimeService;
 
         public RemoveWorkSpaceMemberCommandHandler(
             IUnitOfWork unitOfWork,
             IPermissionService permission,
-            ICurrentUserService currentUser)
+            ICurrentUserService currentUser,
+            IRealtimeService realtimeService)
         {
             _unitOfWork = unitOfWork;
             _memberRepository = unitOfWork.GetRepository<WorkspaceMember, Guid>();
             _permission = permission;
             _currentUser = currentUser;
+            _realtimeService = realtimeService;
         }
 
         public async Task<Result> Handle(RemoveWorkSpaceMemberCommand request, CancellationToken cancellationToken)
@@ -90,6 +95,16 @@ namespace WorkFlow.Application.Features.WorkSpaceMembers.Commands
 
             await _memberRepository.DeleteAsync(targetMember);
             await _unitOfWork.SaveChangesAsync();
+
+            var payload = new
+            {
+                WorkSpaceId = request.WorkspaceId,
+                UserId = request.TargetUserId,
+                Status = true,
+            };
+
+            await _realtimeService.SendToUserAsync(request.TargetUserId, WorkspaceEvents.MemberRemoved, payload);
+            await _realtimeService.SendToWorkspaceAsync(request.WorkspaceId, WorkspaceEvents.MemberRemoved, payload);
 
             return Result.Success("Xoá thành viên thành công.");
         }

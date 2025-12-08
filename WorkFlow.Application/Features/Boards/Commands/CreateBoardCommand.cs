@@ -97,7 +97,8 @@ namespace WorkFlow.Application.Features.Boards.Commands
 
             var dto = _mapper.Map<BoardDto>(board);
 
-            await _realtimeService.SendToUserAsync(userId, BoardEvents.Created, dto);
+            await _realtimeService.SendToBoardAsync(board.Id, BoardEvents.Updated, dto);
+            await _realtimeService.SendToWorkspaceAsync(board.WorkspaceId, BoardEvents.Updated, dto);
 
             return Result<BoardDto>.Success(dto);
         }
