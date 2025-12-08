@@ -15,6 +15,7 @@
 
         public static Result Failure(string error)
             => new(false, error);
+        public static Result Success(string message) => new(true, message);
     }
 
     public class Result<T>

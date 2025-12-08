@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Text.Json.Serialization;
 using WorkFlow.API.Hubs;
 using WorkFlow.API.Middleware;
 using WorkFlow.Application;
@@ -10,46 +11,52 @@ using WorkFlow.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Logging.SetMinimumLevel(LogLevel.Debug);
+builder.Logging.AddFilter("Microsoft.AspNetCore.Watch", LogLevel.None);
 
-// Add HttpContextAccessor for CurrentUserService
+// HttpContext accessor
 builder.Services.AddHttpContextAccessor();
 
-// Add services to the container.
+// Application + Infrastructure
 builder.Services.AddApplication();
 builder.Services.AddScoped<IRealtimeService, RealtimeService>();
-
 builder.Services.AddInfrastructure(builder.Configuration);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(o =>
+    {
+        o.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    });
 
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials()
-            // In production, replace this with the specific origin of your frontend application.
-            .SetIsOriginAllowed(origin => true);
+        policy.AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials()
+              .SetIsOriginAllowed(origin => true);
     });
 });
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new() { Title = "Workflow API", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Workflow API",
+        Version = "v1"
+    });
+
+    c.EnableAnnotations();
 
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
-        Description = "Nhập vào định dạng: {token}",
+        Description = "Nhập vào: Bearer {token}",
         Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT"
+        Type = SecuritySchemeType.ApiKey
     });
 
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -71,8 +78,7 @@ builder.Services.AddSwaggerGen(c =>
 // SignalR
 builder.Services.AddSignalR();
 
-
-// Configure Middleware and the HTTP request pipeline.
+// JWT
 var jwtConfig = builder.Configuration.GetSection("Jwt");
 var signingKey = jwtConfig["SigningKey"];
 
@@ -83,8 +89,7 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    // Use HTTP for development purposes only. In production, always use HTTPS.
-    options.RequireHttpsMetadata = builder.Environment.IsDevelopment() ? false : true;
+    options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
 
     options.TokenValidationParameters = new TokenValidationParameters
     {
@@ -95,26 +100,27 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = jwtConfig["Audience"],
 
         ValidateIssuerSigningKey = true,
+
         IssuerSigningKey = new SymmetricSecurityKey(Convert.FromHexString(signingKey!)),
 
         ValidateLifetime = true,
-
-        NameClaimType = "userId",
         ClockSkew = TimeSpan.Zero,
+
+        NameClaimType = "userId"
     };
 
+    // Support SignalR token via query string
     options.Events = new JwtBearerEvents
     {
         OnMessageReceived = context =>
         {
             var accessToken = context.Request.Query["access_token"];
-
             var path = context.HttpContext.Request.Path;
 
             if (!string.IsNullOrEmpty(accessToken) &&
-                (path.StartsWithSegments("/hubs/board")
-                || path.StartsWithSegments("/hubs/workspace")
-                || path.StartsWithSegments("/hubs/user")))
+                (path.StartsWithSegments("/hubs/board") ||
+                 path.StartsWithSegments("/hubs/workspace") ||
+                 path.StartsWithSegments("/hubs/user")))
             {
                 context.Token = accessToken;
             }
@@ -125,7 +131,6 @@ builder.Services.AddAuthentication(options =>
         OnChallenge = async context =>
         {
             context.HandleResponse();
-
             context.Response.StatusCode = 401;
             context.Response.ContentType = "application/json";
 
@@ -141,16 +146,13 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+app.UseMiddleware<ErrorHandling>();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-app.UseMiddleware<ErrorHandling>();
-
-//app.UseHttpsRedirection();
 
 app.UseCors("AllowFrontend");
 
@@ -159,6 +161,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+// SignalR hubs
 app.MapHub<BoardHub>("/hubs/board");
 app.MapHub<WorkspaceHub>("/hubs/workspace");
 app.MapHub<UserHub>("/hubs/user");
