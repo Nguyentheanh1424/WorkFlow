@@ -59,6 +59,12 @@ namespace WorkFlow.Infrastructure.Repository
 
                     if (entry.Entity.CreatedBy == null)
                         entry.Entity.CreatedBy = userId;
+
+                    if (entry.Entity is IHasModificationTime mod)
+                    {
+                        mod.UpdatedAt = now;
+                        mod.UpdatedBy = userId;
+                    }
                 }
             }
 
