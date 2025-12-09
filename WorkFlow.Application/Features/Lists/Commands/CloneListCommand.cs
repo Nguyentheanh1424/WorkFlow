@@ -133,14 +133,14 @@ namespace WorkFlow.Application.Features.Lists.Commands
 
                 foreach (var task in tasks)
                 {
-                    var newTask = Domain.Entities.Task.Create(newCard.Id, task.Title);
+                    var newTask = Domain.Entities.Task.Create(newCard.Id, task.Title, task.Position);
                     await _taskRepository.AddAsync(newTask);
 
                     var subs = await _subTaskRepository.FindAsync(st => st.TaskId == task.Id);
 
                     foreach (var st in subs)
                     {
-                        var newSt = SubTask.Create(newTask.Id, st.Title);
+                        var newSt = SubTask.Create(newTask.Id, st.Title, st.Position);
                         newSt.UpdateStatus(st.Status);
                         newSt.SetDueDate(st.DueDate);
 

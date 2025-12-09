@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WorkFlow.Application.Common.Mappings;
 using WorkFlow.Application.Features.Attachments.Dtos;
 using WorkFlow.Application.Features.CardAssignees.Dtos;
 using WorkFlow.Application.Features.Tasks.Dtos;
+using WorkFlow.Domain.Entities;
 
 namespace WorkFlow.Application.Features.Cards.Dtos
 {
-    public class CardDetailDto
+    public class CardDetailDto : IMapFrom<Card>
     {
         public Guid Id { get; set; }
         public Guid ListId { get; set; }

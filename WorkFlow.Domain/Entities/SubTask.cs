@@ -13,6 +13,7 @@ namespace WorkFlow.Domain.Entities
         public Guid TaskId { get; set; }
 
         public string Title { get; set; } = null!;
+        public int Position { get; set; }
         public JobStatus Status { get; set; } = JobStatus.Todo;
 
         public DateTime? DueDate { get; set; }
@@ -22,18 +23,21 @@ namespace WorkFlow.Domain.Entities
 
         protected SubTask() { }
 
-        public static SubTask Create(Guid taskId, string title)
+        public static SubTask Create(Guid taskId, string title, int position)
         {
             return new SubTask
             {
                 TaskId = taskId,
                 Title = title,
+                Position = position,
                 Status = JobStatus.Todo,
                 ReminderEnabled = false
             };
         }
 
         public void Rename(string newTitle) => Title = newTitle;
+
+        public void MoveTo(int newPosition) => Position = newPosition;
 
         public void UpdateStatus(JobStatus newStatus) => Status = newStatus;
 

@@ -13,9 +13,11 @@ using WorkFlow.Application.Common.Interfaces.Services;
 using WorkFlow.Application.Features.Attachments.Dtos;
 using WorkFlow.Application.Features.CardAssignees.Dtos;
 using WorkFlow.Application.Features.Cards.Dtos;
+using WorkFlow.Application.Features.SubTasks.Dtos;
 using WorkFlow.Application.Features.Tasks.Dtos;
 using WorkFlow.Domain.Common;
 using WorkFlow.Domain.Entities;
+using WorkFlow.Domain.Enums;
 
 namespace WorkFlow.Application.Features.Cards.Queries
 {
@@ -89,25 +91,26 @@ namespace WorkFlow.Application.Features.Cards.Queries
             var tasks = await taskRepo.FindAsync(t => t.CardId == card.Id);
             var taskDtos = new List<TaskDto>();
 
-            foreach (var task in tasks)
+            foreach (var task in tasks.OrderBy(t => t.Position))
             {
                 var taskDto = _mapper.Map<TaskDto>(task);
 
-                var subs = await subTaskRepo.FindAsync(st => st.TaskId == task.Id);
-                foreach (var sub in subs)
-                {
-                    var subDto = _mapper.Map<SubTaskDto>(sub);
+                var subTasks = await subTaskRepo.FindAsync(st => st.TaskId == task.Id);
 
-                    var subAssignees = await subTaskAssigneeRepo.FindAsync(sa => sa.SubTaskId == sub.Id);
-                    subDto.Assignees = subAssignees.Select(sa => sa.UserId).ToList();
+                taskDto.SubTasks = subTasks
+                    .OrderBy(st => st.Position)
+                    .Select(st => _mapper.Map<SubTaskDto>(st))
+                    .ToList();
 
-                    taskDto.SubTasks.Add(subDto);
-                }
+                taskDto.TotalSubTasks = taskDto.SubTasks.Count;
+                taskDto.CompletedSubTasks = taskDto.SubTasks.Count(x => x.Status == JobStatus.Done);
+                taskDto.Progress = taskDto.TotalSubTasks == 0
+                    ? 0
+                    : (double)taskDto.CompletedSubTasks / taskDto.TotalSubTasks;
 
-                taskDtos.Add(taskDto);
+                dto.Tasks.Add(taskDto);
             }
 
-            dto.Tasks = taskDtos;
 
             return Result<CardDetailDto>.Success(dto);
         }
