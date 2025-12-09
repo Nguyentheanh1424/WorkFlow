@@ -11,6 +11,7 @@ namespace WorkFlow.Application.Features.CardAssignees.Dtos
     public class CardAssigneeDto : IMapFrom<CardAssignee>
     {
         public Guid UserId { get; set; }
+        public string UserName { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
     }
 }
