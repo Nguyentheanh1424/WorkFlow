@@ -119,7 +119,7 @@ builder.Services.AddAuthentication(options =>
 
             if (!string.IsNullOrEmpty(accessToken) &&
                 (path.StartsWithSegments("/hubs/board") ||
-                 path.StartsWithSegments("/hubs/workspace") ||
+                 path.StartsWithSegments("/hubs/workSpace") ||
                  path.StartsWithSegments("/hubs/user")))
             {
                 context.Token = accessToken;
@@ -163,7 +163,7 @@ app.MapControllers();
 
 // SignalR hubs
 app.MapHub<BoardHub>("/hubs/board");
-app.MapHub<WorkspaceHub>("/hubs/workspace");
+app.MapHub<WorkspaceHub>("/hubs/workSpace");
 app.MapHub<UserHub>("/hubs/user");
 
 app.Run();

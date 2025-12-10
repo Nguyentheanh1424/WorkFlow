@@ -8,7 +8,7 @@ namespace WorkFlow.Application.Common.Interfaces.Services
 {
     public interface IPermissionService
     {
-        IWorkspacePermissionService Workspace { get; }
+        IWorkSpacePermissionService Workspace { get; }
         IBoardPermissionService Board { get; }
         ICardPermissionService Card { get; }
     }

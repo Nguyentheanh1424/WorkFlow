@@ -4,7 +4,7 @@ using WorkFlow.Domain.Enums;
 
 namespace WorkFlow.Application.Common.Interfaces.Services
 {
-    public interface IWorkspacePermissionService
+    public interface IWorkSpacePermissionService
     {
         Task<WorkSpaceRole?> GetRoleAsync(Guid workspaceId, Guid userId);
 

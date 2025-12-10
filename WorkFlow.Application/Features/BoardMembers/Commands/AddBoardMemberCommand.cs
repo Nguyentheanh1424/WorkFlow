@@ -71,7 +71,7 @@ namespace WorkFlow.Application.Features.BoardMembers.Commands
                 request.Role
             );
 
-            await _permission.Workspace.EnsureMemberAsync(board.WorkspaceId, request.UserId);
+            await _permission.Workspace.EnsureMemberAsync(board.WorkSpaceId, request.UserId);
 
             var user = await _userRepository.GetByIdAsync(request.UserId)
                 ?? throw new NotFoundException("User không tồn tại.");

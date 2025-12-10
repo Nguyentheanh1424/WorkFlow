@@ -19,10 +19,10 @@ namespace WorkFlow.Application.Common.Interfaces.Services
         Task SendToBoardAsync(Guid boardId, string method, object payload);
 
         /// <summary>
-        /// Sends a message with the specified method and payload to the given workspace asynchronously.
+        /// Sends a message with the specified method and payload to the given workSpace asynchronously.
         /// </summary>
-        /// <param name="workspaceId">The unique identifier of the workspace to which the message will be sent.</param>
-        /// <param name="method">The name of the method or action to invoke in the target workspace. Cannot be null or empty.</param>
+        /// <param name="workspaceId">The unique identifier of the workSpace to which the message will be sent.</param>
+        /// <param name="method">The name of the method or action to invoke in the target workSpace. Cannot be null or empty.</param>
         /// <param name="payload">The payload object to include with the message. May be null if the method does not require additional data.</param>
         /// <returns>A task that represents the asynchronous send operation.</returns>
         Task SendToWorkspaceAsync(Guid workspaceId, string method, object payload);

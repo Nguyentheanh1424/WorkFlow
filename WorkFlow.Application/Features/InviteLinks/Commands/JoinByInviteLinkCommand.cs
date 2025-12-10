@@ -52,7 +52,7 @@ namespace WorkFlow.Application.Features.InviteLinks.Commands
             await _repository.UpdateAsync(link);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            // TODO: Add user to workspace/board
+            // TODO: Add user to workSpace/board
 
             return Result<bool>.Success(true);
         }

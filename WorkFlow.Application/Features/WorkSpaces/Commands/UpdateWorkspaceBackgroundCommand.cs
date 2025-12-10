@@ -1,48 +1,83 @@
+using AutoMapper;
 using FluentValidation;
 using MediatR;
-using AutoMapper;
+using WorkFlow.Application.Common.Constants.EventNames;
+using WorkFlow.Application.Common.Interfaces.Auth;
 using WorkFlow.Application.Common.Interfaces.Repository;
+using WorkFlow.Application.Common.Interfaces.Services;
 using WorkFlow.Application.Features.WorkSpaces.Dtos;
-using WorkFlow.Domain.Entities;
 using WorkFlow.Domain.Common;
+using WorkFlow.Domain.Entities;
 
 namespace WorkFlow.Application.Features.WorkSpaces.Commands
 {
-    public record UpdateWorkspaceBackgroundCommand(Guid Id, string? Background) : IRequest<Result<WorkSpaceDto>>;
+    public record UpdateWorkspaceBackgroundCommand(Guid WorkspaceId, string? Background)
+    : IRequest<Result>;
 
-    public class UpdateWorkspaceBackgroundCommandValidator : AbstractValidator<UpdateWorkspaceBackgroundCommand>
+
+    public class UpdateWorkspaceBackgroundCommandValidator
+    : AbstractValidator<UpdateWorkspaceBackgroundCommand>
     {
         public UpdateWorkspaceBackgroundCommandValidator()
         {
+            RuleFor(x => x.WorkspaceId).NotEmpty();
             RuleFor(x => x.Background)
-                .MaximumLength(500).WithMessage("Background không được vượt quá 500 ký tự.");
+                .MaximumLength(500)
+                .WithMessage("Đường dẫn background quá dài.");
         }
     }
 
-    public class UpdateWorkspaceBackgroundCommandHandler : IRequestHandler<UpdateWorkspaceBackgroundCommand, Result<WorkSpaceDto>>
+    public class UpdateWorkspaceBackgroundCommandHandler
+    : IRequestHandler<UpdateWorkspaceBackgroundCommand, Result>
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IRepository<WorkSpace, Guid> _repository;
-        private readonly IMapper _mapper;
+        private readonly ICurrentUserService _currentUser;
+        private readonly IPermissionService _permission;
+        private readonly IRealtimeService _realtimeService;
 
-        public UpdateWorkspaceBackgroundCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public UpdateWorkspaceBackgroundCommandHandler(
+            IUnitOfWork unitOfWork,
+            ICurrentUserService currentUser,
+            IPermissionService permission,
+            IRealtimeService realtimeService)
         {
             _unitOfWork = unitOfWork;
-            _repository = _unitOfWork.GetRepository<WorkSpace, Guid>();
-            _mapper = mapper;
+            _currentUser = currentUser;
+            _permission = permission;
+            _realtimeService = realtimeService;
         }
 
-        public async Task<Result<WorkSpaceDto>> Handle(UpdateWorkspaceBackgroundCommand request, CancellationToken cancellationToken)
+        public async Task<Result> Handle(UpdateWorkspaceBackgroundCommand request, CancellationToken cancellationToken)
         {
-            var workspace = await _repository.GetByIdAsync(request.Id);
+            if (_currentUser.UserId == null)
+                return Result.Failure("Không xác định người dùng.");
+
+            var userId = _currentUser.UserId.Value;
+
+            var repo = _unitOfWork.GetRepository<WorkSpace, Guid>();
+
+            var workspace = await repo.GetByIdAsync(request.WorkspaceId);
             if (workspace == null)
-                return Result<WorkSpaceDto>.Failure("Workspace không tồn tại.");
+                return Result.Failure("Workspace không tồn tại.");
 
-            workspace.UpdateBackground(request.Background);
+            await _permission.Workspace.EnsureAdminAsync(workspace.Id, userId);
 
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            workspace.Background = request.Background;
 
-            return Result<WorkSpaceDto>.Success(_mapper.Map<WorkSpaceDto>(workspace));
+            await repo.UpdateAsync(workspace);
+            await _unitOfWork.SaveChangesAsync();
+
+            await _realtimeService.SendToWorkspaceAsync(
+                workspace.Id,
+                WorkspaceEvents.Updated,
+                new
+                {
+                    WorkspaceId = workspace.Id,
+                    Background = workspace.Background
+                }
+            );
+
+            return Result.Success();
         }
     }
 }

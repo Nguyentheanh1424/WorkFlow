@@ -62,21 +62,21 @@ namespace WorkFlow.Application.Features.WorkSpaces.Commands
 
             var userId = _currentUser.UserId.Value;
 
-            var workspace = WorkSpace.Create(
+            var workSpace = WorkSpace.Create(
                 request.WorkSpace.Name,
                 request.WorkSpace.Type,
                 request.WorkSpace.Background,
                 request.WorkSpace.Description
             );
 
-            await _workspaceRepository.AddAsync(workspace);
+            await _workspaceRepository.AddAsync(workSpace);
 
-            var ownerMember = WorkspaceMember.Create(workspace.Id, userId, WorkSpaceRole.Owner);
+            var ownerMember = WorkspaceMember.Create(workSpace.Id, userId, WorkSpaceRole.Owner);
             await _workspaceMemberRepository.AddAsync(ownerMember);
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            var dto = _mapper.Map<WorkSpaceDto>(workspace);
+            var dto = _mapper.Map<WorkSpaceDto>(workSpace);
 
             await _realtimeService.SendToUserAsync(
                 userId,

@@ -9,11 +9,11 @@ public class BoardPermissionService : IBoardPermissionService
 {
     private readonly IRepository<BoardMember, Guid> _boardMemberRepository;
     private readonly IRepository<Board, Guid> _boardRepository;
-    private readonly IWorkspacePermissionService _workspacePermission;
+    private readonly IWorkSpacePermissionService _workspacePermission;
 
     public BoardPermissionService(
         IUnitOfWork unitOfWork,
-        IWorkspacePermissionService workspacePermission)
+        IWorkSpacePermissionService workspacePermission)
     {
         _boardMemberRepository = unitOfWork.GetRepository<BoardMember, Guid>();
         _boardRepository = unitOfWork.GetRepository<Board, Guid>();
@@ -48,10 +48,10 @@ public class BoardPermissionService : IBoardPermissionService
             ?? throw new NotFoundException("Board không tồn tại.");
 
         // Workspace Owner/Admin luôn pass
-        if (await IsWorkspaceAdminOrOwner(board.WorkspaceId, userId))
+        if (await IsWorkspaceAdminOrOwner(board.WorkSpaceId, userId))
             return;
 
-        await _workspacePermission.EnsureMemberAsync(board.WorkspaceId, userId);
+        await _workspacePermission.EnsureMemberAsync(board.WorkSpaceId, userId);
 
         var role = await GetRoleAsync(boardId, userId);
         if (role == null)
@@ -63,10 +63,10 @@ public class BoardPermissionService : IBoardPermissionService
         var board = await _boardRepository.GetByIdAsync(boardId)
             ?? throw new NotFoundException("Board không tồn tại.");
 
-        if (await IsWorkspaceAdminOrOwner(board.WorkspaceId, userId))
+        if (await IsWorkspaceAdminOrOwner(board.WorkSpaceId, userId))
             return;
 
-        await _workspacePermission.EnsureMemberAsync(board.WorkspaceId, userId);
+        await _workspacePermission.EnsureMemberAsync(board.WorkSpaceId, userId);
 
         var role = await GetRoleAsync(boardId, userId);
 
@@ -79,10 +79,10 @@ public class BoardPermissionService : IBoardPermissionService
         var board = await _boardRepository.GetByIdAsync(boardId)
             ?? throw new NotFoundException("Board không tồn tại.");
 
-        if (await IsWorkspaceAdminOrOwner(board.WorkspaceId, userId))
+        if (await IsWorkspaceAdminOrOwner(board.WorkSpaceId, userId))
             return;
 
-        await _workspacePermission.EnsureMemberAsync(board.WorkspaceId, userId);
+        await _workspacePermission.EnsureMemberAsync(board.WorkSpaceId, userId);
 
         var role = await GetRoleAsync(boardId, userId);
 
@@ -96,7 +96,7 @@ public class BoardPermissionService : IBoardPermissionService
             ?? throw new NotFoundException("Board không tồn tại.");
 
         // Workspace Owner/Admin có quyền assign mọi role
-        if (await IsWorkspaceAdminOrOwner(board.WorkspaceId, currentUserId))
+        if (await IsWorkspaceAdminOrOwner(board.WorkSpaceId, currentUserId))
             return;
 
         var currentRole = await GetRoleAsync(boardId, currentUserId)
@@ -112,7 +112,7 @@ public class BoardPermissionService : IBoardPermissionService
             ?? throw new NotFoundException("Board không tồn tại.");
 
         // Workspace Owner/Admin có quyền chỉnh sửa mọi thành viên
-        if (await IsWorkspaceAdminOrOwner(board.WorkspaceId, currentUserId))
+        if (await IsWorkspaceAdminOrOwner(board.WorkSpaceId, currentUserId))
             return;
 
         var currentRole = await GetRoleAsync(boardId, currentUserId)

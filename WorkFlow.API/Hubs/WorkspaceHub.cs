@@ -33,7 +33,7 @@ namespace WorkFlow.API.Hubs
         public async Task JoinWorkspace(string workspaceId)
         {
             if (!Guid.TryParse(workspaceId, out var wsGuid))
-                throw new HubException("Invalid workspace id");
+                throw new HubException("Invalid workSpace id");
 
             var userId = Context.User?.FindFirst("userId")?.Value;
             Console.WriteLine(userId);

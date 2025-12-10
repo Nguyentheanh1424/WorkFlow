@@ -9,12 +9,12 @@ namespace WorkFlow.Application.Common.Services
 {
     public class PermissionService : IPermissionService
     {
-        public IWorkspacePermissionService Workspace { get; }
+        public IWorkSpacePermissionService Workspace { get; }
         public IBoardPermissionService Board { get; }
         public ICardPermissionService Card { get; }
 
         public PermissionService(
-            IWorkspacePermissionService workspacePermissionService,
+            IWorkSpacePermissionService workspacePermissionService,
             IBoardPermissionService boardPermissionService,
             ICardPermissionService cardPermissionService)
         {

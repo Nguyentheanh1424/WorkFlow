@@ -10,7 +10,7 @@ namespace WorkFlow.Domain.Entities
 {
     public class Board : FullAuditEntity<Guid>
     {
-        public Guid WorkspaceId { get; set; }
+        public Guid WorkSpaceId { get; set; }
         public Guid OwnerId { get; set; }
 
         public string Title { get; set; } = null!;
@@ -29,7 +29,7 @@ namespace WorkFlow.Domain.Entities
         {
             return new Board
             {
-                WorkspaceId = workspaceId,
+                WorkSpaceId = workspaceId,
                 OwnerId = ownerId,
                 Title = title,
                 Visibility = visibility,

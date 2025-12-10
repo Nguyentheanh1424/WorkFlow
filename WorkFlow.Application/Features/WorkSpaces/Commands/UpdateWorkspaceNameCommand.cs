@@ -1,16 +1,19 @@
 using AutoMapper;
 using FluentValidation;
 using MediatR;
+using WorkFlow.Application.Common.Constants.EventNames;
+using WorkFlow.Application.Common.Interfaces.Auth;
 using WorkFlow.Application.Common.Interfaces.Repository;
 using WorkFlow.Application.Common.Interfaces.Services;
 using WorkFlow.Application.Features.WorkSpaces.Dtos;
-using WorkFlow.Domain.Entities;
 using WorkFlow.Domain.Common;
+using WorkFlow.Domain.Entities;
 using WorkFlow.Domain.Enums;
 
 namespace WorkFlow.Application.Features.WorkSpaces.Commands
 {
-    public record UpdateWorkspaceNameCommand(Guid Id, string Name) : IRequest<Result<WorkSpaceDto>>;
+    public record UpdateWorkspaceNameCommand(Guid WorkspaceId, string Name)
+    : IRequest<Result>;
 
     public class UpdateWorkspaceNameCommandValidator : AbstractValidator<UpdateWorkspaceNameCommand>
     {
@@ -22,30 +25,57 @@ namespace WorkFlow.Application.Features.WorkSpaces.Commands
         }
     }
 
-    public class UpdateWorkspaceNameCommandHandler : IRequestHandler<UpdateWorkspaceNameCommand, Result<WorkSpaceDto>>
+    public class UpdateWorkspaceNameCommandHandler
+    : IRequestHandler<UpdateWorkspaceNameCommand, Result>
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IRepository<WorkSpace, Guid> _repository;
-        private readonly IMapper _mapper;
+        private readonly ICurrentUserService _currentUser;
+        private readonly IPermissionService _permission;
+        private readonly IRealtimeService _realtime;
 
-        public UpdateWorkspaceNameCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public UpdateWorkspaceNameCommandHandler(
+            IUnitOfWork unitOfWork,
+            ICurrentUserService currentUser,
+            IPermissionService permission,
+            IRealtimeService realtime)
         {
             _unitOfWork = unitOfWork;
-            _repository = _unitOfWork.GetRepository<WorkSpace, Guid>();
-            _mapper = mapper;
+            _currentUser = currentUser;
+            _permission = permission;
+            _realtime = realtime;
         }
 
-        public async Task<Result<WorkSpaceDto>> Handle(UpdateWorkspaceNameCommand request, CancellationToken cancellationToken)
+        public async Task<Result> Handle(UpdateWorkspaceNameCommand request, CancellationToken cancellationToken)
         {
-            var workspace = await _repository.GetByIdAsync(request.Id);
+            if (_currentUser.UserId == null)
+                return Result.Failure("Không xác định người dùng.");
+
+            var userId = _currentUser.UserId.Value;
+
+            var repo = _unitOfWork.GetRepository<WorkSpace, Guid>();
+
+            var workspace = await repo.GetByIdAsync(request.WorkspaceId);
             if (workspace == null)
-                return Result<WorkSpaceDto>.Failure("Workspace không tồn tại.");
+                return Result.Failure("Workspace không tồn tại.");
 
-            workspace.UpdateName(request.Name);
+            await _permission.Workspace.EnsureAdminAsync(workspace.Id, userId);
 
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            workspace.Name = request.Name;
 
-            return Result<WorkSpaceDto>.Success(_mapper.Map<WorkSpaceDto>(workspace));
+            await repo.UpdateAsync(workspace);
+            await _unitOfWork.SaveChangesAsync();
+
+            await _realtime.SendToWorkspaceAsync(
+                workspace.Id,
+                WorkspaceEvents.Updated,
+                new
+                {
+                    WorkspaceId = workspace.Id,
+                    Name = workspace.Name
+                }
+            );
+
+            return Result.Success();
         }
     }
 }

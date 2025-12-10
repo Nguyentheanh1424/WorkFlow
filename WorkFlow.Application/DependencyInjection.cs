@@ -32,7 +32,7 @@ namespace WorkFlow.Application
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(PerformanceBehavior<,>));
 
             // Permission services
-            services.AddScoped<IWorkspacePermissionService, WorkspacePermissionService>();
+            services.AddScoped<IWorkSpacePermissionService, WorkSpacePermissionService>();
             services.AddScoped<IBoardPermissionService, BoardPermissionService>();
             services.AddScoped<ICardPermissionService, CardPermissionService>();
             services.AddScoped<IPermissionService, PermissionService>();

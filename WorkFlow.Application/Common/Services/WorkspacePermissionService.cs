@@ -7,11 +7,11 @@ using Task = System.Threading.Tasks.Task;
 
 namespace WorkFlow.Application.Common.Services
 {
-    public class WorkspacePermissionService : IWorkspacePermissionService
+    public class WorkSpacePermissionService : IWorkSpacePermissionService
     {
         private readonly IRepository<WorkspaceMember, Guid> _workspaceMemberRepository;
 
-        public WorkspacePermissionService(IUnitOfWork unitOfWork)
+        public WorkSpacePermissionService(IUnitOfWork unitOfWork)
         {
             _workspaceMemberRepository = unitOfWork.GetRepository<WorkspaceMember, Guid>();
         }
@@ -64,7 +64,7 @@ namespace WorkFlow.Application.Common.Services
 
             var targetRole = await GetRoleAsync(workspaceId, targetUserId);
 
-            // Nếu target chưa join workspace → không cần check hierarchy
+            // Nếu target chưa join workSpace → không cần check hierarchy
             if (targetRole is null)
                 return;
 

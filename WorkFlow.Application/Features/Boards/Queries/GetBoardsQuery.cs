@@ -54,13 +54,13 @@ namespace WorkFlow.Application.Features.Boards.Queries
     {
         private readonly IRepository<Board, Guid> _boardRepository;
         private readonly IRepository<BoardMember, Guid> _boardMemberRepository;
-        private readonly IWorkspacePermissionService _workspacePermission;
+        private readonly IWorkSpacePermissionService _workspacePermission;
         private readonly ICurrentUserService _currentUser;
         private readonly IMapper _mapper;
 
         public GetBoardsQueryHandler(
             IUnitOfWork unitOfWork,
-            IWorkspacePermissionService workspacePermission,
+            IWorkSpacePermissionService workspacePermission,
             ICurrentUserService currentUser,
             IMapper mapper)
         {
@@ -82,7 +82,7 @@ namespace WorkFlow.Application.Features.Boards.Queries
 
             var query = _boardRepository
                 .GetAll()
-                .Where(b => b.WorkspaceId == request.WorkspaceId);
+                .Where(b => b.WorkSpaceId == request.WorkspaceId);
 
             if (request.IncludeArchived != true)
             {

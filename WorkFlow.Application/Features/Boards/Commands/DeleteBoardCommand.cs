@@ -74,7 +74,7 @@ namespace WorkFlow.Application.Features.Boards.Commands
             var dto = _mapper.Map<BoardDto>(board);
 
             await _realtime.SendToBoardAsync(board.Id, BoardEvents.Deleted, dto);
-            await _realtime.SendToWorkspaceAsync(board.WorkspaceId, BoardEvents.Deleted, dto);
+            await _realtime.SendToWorkspaceAsync(board.WorkSpaceId, BoardEvents.Deleted, dto);
 
             return Result.Success();
         }

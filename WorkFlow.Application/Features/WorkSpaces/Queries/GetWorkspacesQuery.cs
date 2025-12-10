@@ -1,5 +1,6 @@
-using AutoMapper;
+﻿using AutoMapper;
 using MediatR;
+using WorkFlow.Application.Common.Interfaces.Auth;
 using WorkFlow.Application.Common.Interfaces.Repository;
 using WorkFlow.Application.Features.WorkSpaces.Dtos;
 using WorkFlow.Domain.Common;
@@ -7,42 +8,68 @@ using WorkFlow.Domain.Entities;
 
 namespace WorkFlow.Application.Features.WorkSpaces.Queries
 {
-    public record GetWorkspacesQuery(string? Search) : IRequest<Result<List<WorkSpaceDto>>>;
+    public record GetWorkspacesQuery(string? Search)
+    : IRequest<Result<List<WorkSpaceDto>>>;
 
-    public class GetWorkspacesQueryHandler : IRequestHandler<GetWorkspacesQuery, Result<List<WorkSpaceDto>>>
+
+    public class GetWorkspacesQueryHandler
+        : IRequestHandler<GetWorkspacesQuery, Result<List<WorkSpaceDto>>>
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IRepository<WorkSpace, Guid> _repository;
+        private readonly ICurrentUserService _currentUser;
         private readonly IMapper _mapper;
 
-        public GetWorkspacesQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public GetWorkspacesQueryHandler(
+            IUnitOfWork unitOfWork,
+            ICurrentUserService currentUser,
+            IMapper mapper)
         {
             _unitOfWork = unitOfWork;
-            _repository = _unitOfWork.GetRepository<WorkSpace, Guid>();
+            _currentUser = currentUser;
             _mapper = mapper;
         }
 
         public async Task<Result<List<WorkSpaceDto>>> Handle(GetWorkspacesQuery request, CancellationToken cancellationToken)
         {
-            var query = _repository.GetAll();
+            if (_currentUser.UserId == null)
+                return Result<List<WorkSpaceDto>>.Failure("Không xác định người dùng.");
 
-            // Support search by name
+            var userId = _currentUser.UserId.Value;
+
+            var workspaceRepo = _unitOfWork.GetRepository<WorkSpace, Guid>();
+            var memberRepo = _unitOfWork.GetRepository<WorkspaceMember, Guid>();
+
+            var memberships = await memberRepo.FindAsync(m => m.UserId == userId);
+
+            if (!memberships.Any())
+                return Result<List<WorkSpaceDto>>.Success(new List<WorkSpaceDto>());
+
+            var workspaceIds = memberships.Select(m => m.WorkSpaceId).ToList();
+
+            var workspaces = await workspaceRepo.FindAsync(ws => workspaceIds.Contains(ws.Id));
+
             if (!string.IsNullOrWhiteSpace(request.Search))
             {
-                query = query.Where(w => w.Name.Contains(request.Search));
-            }
-
-            var workspaces = await _repository.GetAllAsync();
-
-            // Apply search filter if needed
-            if (!string.IsNullOrWhiteSpace(request.Search))
-            {
+                var keyword = request.Search.Trim().ToLower();
                 workspaces = workspaces
-                    .Where(w => w.Name.Contains(request.Search, StringComparison.OrdinalIgnoreCase))
+                    .Where(ws =>
+                        (ws.Name ?? "").ToLower().Contains(keyword) ||
+                        (ws.Description ?? "").ToLower().Contains(keyword))
                     .ToList();
             }
 
-            var dtos = _mapper.Map<List<WorkSpaceDto>>(workspaces);
+            var memberLookup = memberships.ToDictionary(m => m.WorkSpaceId, m => m.Role.ToString());
+
+            var dtos = workspaces
+                .OrderByDescending(ws => ws.UpdatedAt)
+                .Select(ws =>
+                {
+                    var dto = _mapper.Map<WorkSpaceDto>(ws);
+                    dto.Role = memberLookup.ContainsKey(ws.Id) ? memberLookup[ws.Id] : "";
+                    return dto;
+                })
+                .ToList();
+
             return Result<List<WorkSpaceDto>>.Success(dtos);
         }
     }

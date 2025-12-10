@@ -14,12 +14,12 @@ namespace WorkFlow.Application.Common.Services
         private readonly IRepository<Board, Guid> _boardRepository;
         private readonly IRepository<List, Guid> _listRepository;
         private readonly IBoardPermissionService _boardPermission;
-        private readonly IWorkspacePermissionService _workspacePermission;
+        private readonly IWorkSpacePermissionService _workspacePermission;
 
         public CardPermissionService(
             IUnitOfWork unitOfWork,
             IBoardPermissionService boardPermission,
-            IWorkspacePermissionService workspacePermission)
+            IWorkSpacePermissionService workspacePermission)
         {
             _cardRepository = unitOfWork.GetRepository<Card, Guid>();
             _assigneeRepository = unitOfWork.GetRepository<CardAssignee, Guid>();
@@ -47,7 +47,7 @@ namespace WorkFlow.Application.Common.Services
             var board = await _boardRepository.GetByIdAsync(list.BoardId)
                 ?? throw new NotFoundException("Board chứa List không tồn tại.");
 
-            return (list.BoardId, board.WorkspaceId);
+            return (list.BoardId, board.WorkSpaceId);
         }
 
         private async Task<bool> IsAssignee(Guid cardId, Guid userId)
