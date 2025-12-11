@@ -1,7 +1,7 @@
 ﻿using System.Linq.Expressions;
 using WorkFlow.Domain.Common;
 
-namespace WorkFlow.Application.Common.Interfaces.Repository
+namespace WorkFlow.Application.Common.Interfaces.Repositories
 {
     public interface IRepository<TEntity, TId> where TEntity : Entity<TId>
     {

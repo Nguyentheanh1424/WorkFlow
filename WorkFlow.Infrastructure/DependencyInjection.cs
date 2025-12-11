@@ -5,11 +5,11 @@ using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
 using WorkFlow.Application.Common.Exceptions;
 using WorkFlow.Application.Common.Interfaces.Auth;
-using WorkFlow.Application.Common.Interfaces.Repository;
+using WorkFlow.Application.Common.Interfaces.Repositories;
 using WorkFlow.Application.Common.Interfaces.Services;
 using WorkFlow.Infrastructure.Auth;
 using WorkFlow.Infrastructure.Persistence;
-using WorkFlow.Infrastructure.Repository;
+using WorkFlow.Infrastructure.Repositories;
 using WorkFlow.Infrastructure.Services;
 
 namespace WorkFlow.Infrastructure

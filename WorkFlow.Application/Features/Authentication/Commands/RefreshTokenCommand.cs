@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Configuration;
 using WorkFlow.Application.Common.Exceptions;
-using WorkFlow.Application.Common.Interfaces.Repository;
+using WorkFlow.Application.Common.Interfaces.Repositories;
 using WorkFlow.Application.Common.Interfaces.Services;
 using WorkFlow.Application.Features.Authentication.Dtos;
 using WorkFlow.Domain.Common;

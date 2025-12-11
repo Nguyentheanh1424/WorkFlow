@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Collections;
 using WorkFlow.Application.Common.Interfaces.Auth;
-using WorkFlow.Application.Common.Interfaces.Repository;
+using WorkFlow.Application.Common.Interfaces.Repositories;
 using WorkFlow.Domain.Common;
 
-namespace WorkFlow.Infrastructure.Repository
+namespace WorkFlow.Infrastructure.Repositories
 {
     public class UnitOfWork : IUnitOfWork
     {

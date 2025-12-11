@@ -1,6 +1,6 @@
 ﻿using WorkFlow.Domain.Common;
 
-namespace WorkFlow.Application.Common.Interfaces.Repository
+namespace WorkFlow.Application.Common.Interfaces.Repositories
 {
     public interface IUnitOfWork : IDisposable
     {

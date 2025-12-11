@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WorkFlow.Application.Common.Interfaces.Auth;
-using WorkFlow.Application.Common.Interfaces.Repository;
+using WorkFlow.Application.Common.Interfaces.Repositories;
 using WorkFlow.Application.Common.Interfaces.Services;
 using WorkFlow.Application.Features.Lists.Dtos;
 using WorkFlow.Domain.Common;

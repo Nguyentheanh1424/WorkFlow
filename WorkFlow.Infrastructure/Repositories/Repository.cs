@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using WorkFlow.Application.Common.Interfaces.Repository;
+using WorkFlow.Application.Common.Interfaces.Repositories;
 using WorkFlow.Domain.Common;
 
-namespace WorkFlow.Infrastructure.Repository
+namespace WorkFlow.Infrastructure.Repositories
 {
     public class Repository<TEntity, TId> : IRepository<TEntity, TId> where TEntity : Entity<TId>
     {

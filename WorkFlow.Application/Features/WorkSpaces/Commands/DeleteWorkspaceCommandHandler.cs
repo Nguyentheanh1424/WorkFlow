@@ -1,5 +1,5 @@
 using MediatR;
-using WorkFlow.Application.Common.Interfaces.Repository;
+using WorkFlow.Application.Common.Interfaces.Repositories;
 using WorkFlow.Domain.Common;
 using WorkFlow.Domain.Entities;
 

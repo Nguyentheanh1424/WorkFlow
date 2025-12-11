@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WorkFlow.Application.Common.Exceptions;
 using WorkFlow.Application.Common.Interfaces.Auth;
-using WorkFlow.Application.Common.Interfaces.Repository;
+using WorkFlow.Application.Common.Interfaces.Repositories;
 using WorkFlow.Application.Common.Interfaces.Services;
 using WorkFlow.Application.Features.SubTasks.Dtos;
 using WorkFlow.Application.Features.Tasks.Dtos;

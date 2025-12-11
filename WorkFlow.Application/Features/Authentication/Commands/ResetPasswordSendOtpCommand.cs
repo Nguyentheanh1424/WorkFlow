@@ -1,6 +1,6 @@
 using MediatR;
 using WorkFlow.Application.Common.Interfaces.Auth;
-using WorkFlow.Application.Common.Interfaces.Repository;
+using WorkFlow.Application.Common.Interfaces.Repositories;
 using WorkFlow.Application.Common.Interfaces.Services;
 using WorkFlow.Domain.Common;
 using WorkFlow.Domain.Entities;
