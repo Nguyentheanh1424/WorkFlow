@@ -1,5 +1,5 @@
-using MediatR;
 using FluentValidation;
+using MediatR;
 using WorkFlow.Domain.Common;
 
 namespace WorkFlow.Application.Features.WorkSpaces.Commands

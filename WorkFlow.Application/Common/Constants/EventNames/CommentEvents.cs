@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace WorkFlow.Application.Common.Constants.EventNames
+﻿namespace WorkFlow.Application.Common.Constants.EventNames
 {
     public static class CommentEvents
     {

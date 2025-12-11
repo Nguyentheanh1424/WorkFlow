@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WorkFlow.Application.Common.Interfaces.Repositories;
+﻿using WorkFlow.Application.Common.Interfaces.Repositories;
 using WorkFlow.Application.Common.Interfaces.Services;
 using WorkFlow.Domain.Entities;
 using WorkFlow.Domain.Enums;
-using WorkFlow.Infrastructure.Persistence;
 
 namespace WorkFlow.Infrastructure.Services
 {

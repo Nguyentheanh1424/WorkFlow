@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WorkFlow.Domain.Entities;
-using WorkFlow.Domain.Enums;
+﻿using WorkFlow.Domain.Enums;
 
 namespace WorkFlow.Application.Features.BoardMembers.Dtos
 {

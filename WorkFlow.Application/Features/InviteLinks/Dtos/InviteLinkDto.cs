@@ -1,7 +1,7 @@
 using AutoMapper;
+using WorkFlow.Application.Common.Mappings;
 using WorkFlow.Domain.Entities;
 using WorkFlow.Domain.Enums;
-using WorkFlow.Application.Common.Mappings;
 
 public class InviteLinkDto : IMapFrom<InviteLink>
 {

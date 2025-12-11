@@ -7,7 +7,7 @@ using WorkFlow.Domain.Enums;
 
 namespace WorkFlow.Application.Features.InviteLinks.Commands
 {
-    public record VerifyInviteLinkCommand(string Token): IRequest<Result<bool>>;
+    public record VerifyInviteLinkCommand(string Token) : IRequest<Result<bool>>;
 
     public class VerifyInviteLinkCommandValidator : AbstractValidator<VerifyInviteLinkCommand>
     {

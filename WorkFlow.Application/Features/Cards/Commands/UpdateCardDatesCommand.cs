@@ -1,11 +1,6 @@
 ﻿using AutoMapper;
 using FluentValidation;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WorkFlow.Application.Common.Constants.EventNames;
 using WorkFlow.Application.Common.Exceptions;
 using WorkFlow.Application.Common.Interfaces.Auth;
@@ -39,7 +34,7 @@ namespace WorkFlow.Application.Features.Cards.Commands
                 })
                 .WithMessage("DueDate không được nhỏ hơn StartDate.");
 
-            
+
 
             RuleFor(x => x.ReminderBeforeMinutes)
                 .NotNull()
@@ -111,7 +106,7 @@ namespace WorkFlow.Application.Features.Cards.Commands
 
             if (request.ReminderEnabled)
                 card.EnableReminder(request.ReminderBeforeMinutes!.Value);
-            else 
+            else
                 card.DisableReminder();
 
             await cardRepo.UpdateAsync(card);

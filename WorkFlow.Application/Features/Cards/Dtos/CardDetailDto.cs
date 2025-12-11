@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WorkFlow.Application.Common.Mappings;
+﻿using WorkFlow.Application.Common.Mappings;
 using WorkFlow.Application.Features.Attachments.Dtos;
 using WorkFlow.Application.Features.CardAssignees.Dtos;
 using WorkFlow.Application.Features.Tasks.Dtos;

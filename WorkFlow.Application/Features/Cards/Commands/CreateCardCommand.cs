@@ -1,11 +1,6 @@
 ﻿using AutoMapper;
 using FluentValidation;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WorkFlow.Application.Common.Constants.EventNames;
 using WorkFlow.Application.Common.Exceptions;
 using WorkFlow.Application.Common.Interfaces.Auth;
@@ -19,7 +14,7 @@ namespace WorkFlow.Application.Features.Cards.Commands
 {
     public record CreateCardCommand(Guid ListId, string Title)
         : IRequest<Result<CardDto>>;
-    
+
     public class CreateCardCommandValidator : AbstractValidator<CreateCardCommand>
     {
         public CreateCardCommandValidator()

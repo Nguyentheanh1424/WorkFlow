@@ -1,14 +1,15 @@
 using FluentValidation;
 using MediatR;
+using WorkFlow.Application.Common.Exceptions;
 using WorkFlow.Application.Common.Interfaces.Auth;
 using WorkFlow.Application.Common.Interfaces.Repositories;
 using WorkFlow.Application.Common.Interfaces.Services;
 using WorkFlow.Domain.Common;
 using WorkFlow.Domain.Common.Helpers;
 using WorkFlow.Domain.Entities;
-using WorkFlow.Application.Common.Exceptions;
 
 namespace WorkFlow.Application.Features.Authentication.Commands;
+
 public record ResetPasswordVerifyCommand(string Otp, string NewPassword)
     : IRequest<Result>;
 

@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using WorkFlow.Application.Features.InviteLinks.Commands;
 using WorkFlow.Application.Features.InviteLinks.Dtos;
 using WorkFlow.Application.Features.InviteLinks.Queries;
-using WorkFlow.Domain.Common;
 
 namespace WorkFlow.API.Controllers
 {
@@ -42,7 +41,7 @@ namespace WorkFlow.API.Controllers
         [HttpPost("{tagetId:guid}/Revoke")]
         public async Task<IActionResult> Revoke(Guid tagetId)
         {
-            var result =  await _mediator.Send(new RevokeInviteLinkCommand(tagetId));
+            var result = await _mediator.Send(new RevokeInviteLinkCommand(tagetId));
             return Ok(result);
         }
 

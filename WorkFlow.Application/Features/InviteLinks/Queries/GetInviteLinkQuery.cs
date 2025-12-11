@@ -1,5 +1,4 @@
 using MediatR;
-using WorkFlow.Application.Features.InviteLinks.Dtos;
 using WorkFlow.Domain.Common;
 
 namespace WorkFlow.Application.Features.InviteLinks.Queries
