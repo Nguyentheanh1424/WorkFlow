@@ -13,7 +13,7 @@ using WorkFlow.Domain.Enums;
 namespace WorkFlow.Application.Features.BoardMembers.Commands
 {
     public record AddBoardMemberCommand(Guid BoardId, Guid UserId, BoardRole Role)
-        : IRequest<Result<BoardMemberDto>>;
+        : IRequest<Result>;
 
     public class AddBoardMemberCommandValidator : AbstractValidator<AddBoardMemberCommand>
     {
@@ -26,7 +26,7 @@ namespace WorkFlow.Application.Features.BoardMembers.Commands
     }
 
     public class AddBoardMemberCommandHandler
-    : IRequestHandler<AddBoardMemberCommand, Result<BoardMemberDto>>
+    : IRequestHandler<AddBoardMemberCommand, Result>
     {
         private readonly IRepository<BoardMember, Guid> _boardMemberRepository;
         private readonly IRepository<Board, Guid> _boardRepository;
@@ -52,7 +52,7 @@ namespace WorkFlow.Application.Features.BoardMembers.Commands
             _userRepository = unitOfWork.GetRepository<User, Guid>();
         }
 
-        public async Task<Result<BoardMemberDto>> Handle(AddBoardMemberCommand request, CancellationToken cancellationToken)
+        public async Task<Result> Handle(AddBoardMemberCommand request, CancellationToken cancellationToken)
         {
             if (_currentUser.UserId == null)
                 throw new ForbiddenAccessException("Không xác định được người dùng.");
@@ -78,7 +78,7 @@ namespace WorkFlow.Application.Features.BoardMembers.Commands
             );
 
             if (exists)
-                return Result<BoardMemberDto>.Failure("User đã thuộc board.");
+                return Result.Failure("User đã thuộc board.");
 
             var member = BoardMember.Create(board.Id, request.UserId, request.Role);
             await _boardMemberRepository.AddAsync(member);
@@ -99,7 +99,7 @@ namespace WorkFlow.Application.Features.BoardMembers.Commands
                 dto
             );
 
-            return Result<BoardMemberDto>.Success(dto);
+            return Result.Success("Thêm thành viên thành công.");
         }
     }
 

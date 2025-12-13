@@ -1,40 +1,84 @@
 ﻿using FluentValidation;
 using MediatR;
-using WorkFlow.Application.Common.Exceptions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using WorkFlow.Application.Common.Interfaces.Auth;
 using WorkFlow.Application.Common.Interfaces.Repositories;
+using WorkFlow.Application.Common.Interfaces.Services;
 using WorkFlow.Domain.Common;
 using WorkFlow.Domain.Entities;
+using WorkFlow.Domain.Enums;
 
 namespace WorkFlow.Application.Features.InviteLinks.Commands
 {
-    public record RevokeInviteLinkCommand(Guid tagetId) : IRequest<Result<bool>>;
-    public class RevokeInviteLinkCommandValidator : AbstractValidator<RevokeInviteLinkCommand>
+    public record RevokeInviteLinkCommand(
+        Guid InviteLinkId
+    ) : IRequest<Result<bool>>;
+
+
+    public class RevokeInviteLinkCommandValidator
+        : AbstractValidator<RevokeInviteLinkCommand>
     {
         public RevokeInviteLinkCommandValidator()
         {
-            RuleFor(x => x.tagetId).NotEmpty();
+            RuleFor(x => x.InviteLinkId)
+                .NotEmpty()
+                .WithMessage("InviteLinkId không được để trống.");
         }
     }
-    public class RevokeInviteLinkCommandHandler : IRequestHandler<RevokeInviteLinkCommand, Result<bool>>
-    {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IRepository<InviteLink, Guid> _repository;
 
-        public RevokeInviteLinkCommandHandler(IUnitOfWork unitOfWork)
+    public class RevokeInviteLinkCommandHandler
+        : IRequestHandler<RevokeInviteLinkCommand, Result<bool>>
+    {
+        private readonly IRepository<InviteLink, Guid> _inviteLinkRepository;
+        private readonly ICurrentUserService _currentUser;
+        private readonly IPermissionService _permission;
+        private readonly IUnitOfWork _unitOfWork;
+
+        public RevokeInviteLinkCommandHandler(
+            IUnitOfWork unitOfWork,
+            ICurrentUserService currentUser,
+            IPermissionService permission)
         {
+            _inviteLinkRepository = unitOfWork.GetRepository<InviteLink, Guid>();
+            _currentUser = currentUser;
+            _permission = permission;
             _unitOfWork = unitOfWork;
-            _repository = unitOfWork.GetRepository<InviteLink, Guid>();
         }
 
-        public async Task<Result<bool>> Handle(RevokeInviteLinkCommand request, CancellationToken cancellationToken)
+        public async Task<Result<bool>> Handle(
+            RevokeInviteLinkCommand request,
+            CancellationToken cancellationToken)
         {
-            var link = await _repository.GetByIdAsync(request.tagetId)
-                ?? throw new NotFoundException("Link không tồn tại");
+            if (_currentUser.UserId == null)
+                return Result<bool>.Failure("Không xác định được người dùng.");
 
-            link.Revoke();
+            var userId = _currentUser.UserId.Value;
 
-            await _repository.UpdateAsync(link);
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            var inviteLink = await _inviteLinkRepository.GetByIdAsync(request.InviteLinkId);
+            if (inviteLink == null)
+                return Result<bool>.Failure("Invite Link không tồn tại.");
+
+            if (inviteLink.Type == InviteLinkType.WorkSpace)
+            {
+                await _permission.Workspace.EnsureAdminAsync(inviteLink.TargetId, userId);
+            }
+            else if (inviteLink.Type == InviteLinkType.Board)
+            {
+                await _permission.Board.EnsureOwnerAsync(inviteLink.TargetId, userId);
+            }
+            else
+            {
+                return Result<bool>.Failure("InviteLinkType không hợp lệ.");
+            }
+
+            inviteLink.Revoke();
+
+            await _inviteLinkRepository.UpdateAsync(inviteLink);
+            await _unitOfWork.SaveChangesAsync();
 
             return Result<bool>.Success(true);
         }

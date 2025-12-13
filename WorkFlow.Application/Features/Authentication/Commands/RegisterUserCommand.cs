@@ -24,9 +24,8 @@ namespace WorkFlow.Application.Features.Authentication.Commands
 
             RuleFor(x => x.data.Name)
                 .NotEmpty().WithMessage("Tên không được để trống.")
-                .MaximumLength(100).WithMessage("Tên workflow không được vượt quá 100 ký tự.")
-                .Matches(@"^[\p{L}\s]+$")
-                .WithMessage("Tên workflow chỉ được chứa chữ cái và khoảng trắng.");
+                .MaximumLength(100).WithMessage("Tên không được vượt quá 100 ký tự.")
+                .Matches(@"^[\p{L}\s]+$").WithMessage("Tên chỉ được chứa chữ cái và khoảng trắng.");
 
             RuleFor(x => x.data.Password)
                 .NotEmpty().WithMessage("Mật khẩu không được để trống.")
@@ -61,7 +60,7 @@ namespace WorkFlow.Application.Features.Authentication.Commands
 
         public async Task<Result> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
         {
-            var email = request.data.Email.Trim().ToLower();
+             var email = request.data.Email.Trim().ToLower();
 
             bool userExists = await _userRepository.AnyAsync(u => u.Email == email);
             if (userExists)
@@ -85,6 +84,7 @@ namespace WorkFlow.Application.Features.Authentication.Commands
 
             await _otpService.MarkOtpSentAsync(email);
 
+            //Console.WriteLine("OTP Code: " + otp);
             await _emailService.SendAsync(
                 email,
                 "Xác thực tài khoản",
