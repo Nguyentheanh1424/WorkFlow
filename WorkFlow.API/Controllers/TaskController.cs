@@ -8,7 +8,7 @@ using WorkFlow.Application.Features.Tasks.Queries;
 namespace WorkFlow.API.Controllers
 {
     [ApiController]
-    [Route("tasks")]
+    [Route("[controller]")]
     [Authorize]
     public class TaskController : ControllerBase
     {
@@ -38,7 +38,7 @@ namespace WorkFlow.API.Controllers
             public string Title { get; set; } = null!;
         }
 
-        [HttpGet("/cards/{cardId:guid}/tasks")]
+        [HttpGet("/Cards/{cardId:guid}/Tasks")]
         [SwaggerOperation(
             Summary = "Lấy danh sách Task trong Card",
             Description = "Trả theo thứ tự Position."
@@ -49,7 +49,7 @@ namespace WorkFlow.API.Controllers
             return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
 
-        [HttpPut("{taskId:guid}/title")]
+        [HttpPut("{taskId:guid}/Title")]
         [SwaggerOperation(Summary = "Cập nhật tiêu đề Task")]
         public async Task<IActionResult> UpdateTitle(Guid taskId, [FromBody] string title)
         {
@@ -57,7 +57,7 @@ namespace WorkFlow.API.Controllers
             return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
 
-        [HttpPut("{taskId:guid}/move")]
+        [HttpPut("{taskId:guid}/Move")]
         [SwaggerOperation(
             Summary = "Di chuyển Task (reorder)",
             Description = "Move Task sang vị trí khác trong cùng Card."

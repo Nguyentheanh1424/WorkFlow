@@ -150,7 +150,7 @@ namespace WorkFlow.API.Controllers
             public Guid TargetListId { get; set; }
         }
 
-        [HttpPost("{sourceListId:guid}/Move-Cards")]
+        [HttpPost("{sourceListId:guid}/MoveCards")]
         [SwaggerOperation(
             Summary = "Di chuyển toàn bộ Cards sang List khác",
             Description = """

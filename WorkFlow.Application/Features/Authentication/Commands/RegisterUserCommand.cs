@@ -60,7 +60,7 @@ namespace WorkFlow.Application.Features.Authentication.Commands
 
         public async Task<Result> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
         {
-             var email = request.data.Email.Trim().ToLower();
+            var email = request.data.Email.Trim().ToLower();
 
             bool userExists = await _userRepository.AnyAsync(u => u.Email == email);
             if (userExists)

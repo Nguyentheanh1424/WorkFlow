@@ -10,7 +10,7 @@ namespace WorkFlow.API.Controllers
 {
 
     [ApiController]
-    [Route("InviteLinks")]
+    [Route("[controller]")]
     [Authorize]
     public class InviteLinkController : ControllerBase
     {
@@ -56,7 +56,7 @@ namespace WorkFlow.API.Controllers
             return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
 
-        [HttpPost("{inviteLinkId:guid}/revoke")]
+        [HttpPost("{inviteLinkId:guid}/Revoke")]
         [SwaggerOperation(
             Summary = "Thu hồi Invite Link",
             Description = """
@@ -71,7 +71,7 @@ namespace WorkFlow.API.Controllers
             return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
 
-        [HttpPost("join")]
+        [HttpPost("Join")]
         [SwaggerOperation(
             Summary = "Join bằng Invite Link",
             Description = """

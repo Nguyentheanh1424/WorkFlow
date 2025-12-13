@@ -61,7 +61,7 @@ namespace WorkFlow.API.Controllers
             return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
 
-        [HttpGet("{boardId:guid}/full")]
+        [HttpGet("{boardId:guid}/Full")]
         [SwaggerOperation(
             Summary = "Lấy toàn bộ dữ liệu Board",
             Description = """

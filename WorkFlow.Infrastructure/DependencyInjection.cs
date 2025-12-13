@@ -23,9 +23,18 @@ namespace WorkFlow.Infrastructure
         {
             // Đăng ký DbContext 
             services.AddDbContext<ApplicationDbContext>(options =>
+            {
                 options.UseNpgsql(
-                    configuration.GetConnectionString("DefaultConnection")
-                ));
+                    configuration.GetConnectionString("DefaultConnection"),
+                    npgsqlOptions =>
+                    {
+                        npgsqlOptions.EnableRetryOnFailure(
+                            maxRetryCount: 5,
+                            maxRetryDelay: TimeSpan.FromSeconds(10),
+                            errorCodesToAdd: null
+                        );
+                    });
+            });
 
             // Đăng ký UnitOfWork
             services.AddScoped<DbContext, ApplicationDbContext>();
@@ -40,6 +49,7 @@ namespace WorkFlow.Infrastructure
             services.AddScoped<ITokenService, JwtTokenService>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IHubPermissionService, HubPermissionService>();
+            services.AddHttpClient<IAvatarGenerator, DiceBearAvatarGenerator>();
 
             //Đăng ký Cache
             var useRedis = bool.TryParse(configuration["Cache:UseRedis"], out var val) && val;

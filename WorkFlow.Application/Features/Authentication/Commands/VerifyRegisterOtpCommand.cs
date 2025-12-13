@@ -30,6 +30,7 @@ namespace WorkFlow.Application.Features.Authentication.Commands
     {
         private readonly IOtpService _otpService;
         private readonly ICacheService _cacheService;
+        private readonly IAvatarGenerator _avatarGenerator;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IRepository<User, Guid> _userRepository;
         private readonly IRepository<AccountAuth, Guid> _accountAuthRepository;
@@ -37,10 +38,12 @@ namespace WorkFlow.Application.Features.Authentication.Commands
         public VerifyRegisterOtpCommandHandler(
             IOtpService otpService,
             ICacheService cacheService,
+            IAvatarGenerator avatarGenerator,
             IUnitOfWork unitOfWork)
         {
             _otpService = otpService;
             _cacheService = cacheService;
+            _avatarGenerator = avatarGenerator;
             _unitOfWork = unitOfWork;
             _userRepository = _unitOfWork.GetRepository<User, Guid>();
             _accountAuthRepository = _unitOfWork.GetRepository<AccountAuth, Guid>();
@@ -63,9 +66,12 @@ namespace WorkFlow.Application.Features.Authentication.Commands
                 return Result.Failure(
                     "Thông tin đăng ký không tồn tại hoặc đã hết hạn. Vui lòng đăng ký lại.");
 
+            var avatarSvg = await _avatarGenerator.GenerateSvgAsync(email);
+
             var user = new User(
                 pendingUser.Name,
-                pendingUser.Email
+                pendingUser.Email,
+                avatarSvg
             );
 
             var userId = await _userRepository.AddAsync(user);

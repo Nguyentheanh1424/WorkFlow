@@ -6,5 +6,9 @@
             : base(message)
         {
         }
+
+        public AppException(Exception? innerException, string message = "Lỗi ứng dụng.") : base(message, innerException)
+        {
+        }
     }
 }

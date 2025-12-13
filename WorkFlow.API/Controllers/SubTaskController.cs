@@ -9,7 +9,7 @@ using WorkFlow.Domain.Enums;
 namespace WorkFlow.API.Controllers
 {
     [ApiController]
-    [Route("subtasks")]
+    [Route("[controller]")]
     [Authorize]
     public class SubTaskController : ControllerBase
     {
@@ -42,7 +42,7 @@ namespace WorkFlow.API.Controllers
             public string Title { get; set; } = null!;
         }
 
-        [HttpGet("/tasks/{taskId:guid}/subtasks")]
+        [HttpGet("/Tasks/{taskId:guid}/Subtasks")]
         [SwaggerOperation(
             Summary = "Lấy danh sách SubTask theo Task",
             Description = "Trả về danh sách sắp xếp theo Position."
@@ -53,7 +53,7 @@ namespace WorkFlow.API.Controllers
             return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
 
-        [HttpPut("{subTaskId:guid}/title")]
+        [HttpPut("{subTaskId:guid}/Title")]
         [SwaggerOperation(Summary = "Cập nhật tiêu đề SubTask")]
         public async Task<IActionResult> UpdateTitle(Guid subTaskId, [FromBody] string title)
         {
@@ -61,7 +61,7 @@ namespace WorkFlow.API.Controllers
             return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
 
-        [HttpPut("{subTaskId:guid}/status")]
+        [HttpPut("{subTaskId:guid}/Status")]
         [SwaggerOperation(Summary = "Cập nhật trạng thái SubTask")]
         public async Task<IActionResult> UpdateStatus(Guid subTaskId, [FromBody] UpdateSubTaskStatusRequest body)
         {
@@ -76,7 +76,7 @@ namespace WorkFlow.API.Controllers
             public JobStatus Status { get; set; }
         }
 
-        [HttpPut("{subTaskId:guid}/dates")]
+        [HttpPut("{subTaskId:guid}/Dates")]
         [SwaggerOperation(Summary = "Cập nhật DueDate và Reminder cho SubTask")]
         public async Task<IActionResult> UpdateDates(Guid subTaskId, [FromBody] UpdateSubTaskDatesRequest body)
         {
@@ -98,7 +98,7 @@ namespace WorkFlow.API.Controllers
             public int? ReminderBeforeMinutes { get; set; }
         }
 
-        [HttpPut("{subTaskId:guid}/move")]
+        [HttpPut("{subTaskId:guid}/Move")]
         [SwaggerOperation(
             Summary = "Di chuyển SubTask (reorder)",
             Description = "Di chuyển vị trí SubTask trong cùng Task."
