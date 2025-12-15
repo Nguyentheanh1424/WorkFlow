@@ -8,7 +8,7 @@ namespace WorkFlow.Domain.Enums
         Actived = 0,
 
         [Description("Bị khóa")]
-        Looked = 1,
+        Locked = 1,
 
         [Description("Bị cấm vĩnh viễn")]
         Banned = 2,

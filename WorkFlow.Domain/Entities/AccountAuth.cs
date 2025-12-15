@@ -82,9 +82,11 @@ namespace WorkFlow.Domain.Entities
             if (LoginAttempt >= maxFail)
             {
                 LockedUntil = DateTime.UtcNow.AddMinutes(lockMinutes);
+                Status = AccountStatus.Locked;
                 LoginAttempt = 0;
-                return "Tài khoản bị khóa trong " + lockMinutes + " phút.";
+                return $"Tài khoản bị khóa {lockMinutes} phút.";
             }
+
 
             return "Tài khoản sẽ bị khóa sau " + (maxFail - LoginAttempt) + " lần đăng nhập thất bại nữa.";
         }
@@ -114,7 +116,7 @@ namespace WorkFlow.Domain.Entities
                     message = "Tài khoản đã được kích hoạt.";
                     break;
 
-                case AccountStatus.Looked:
+                case AccountStatus.Locked:
                     isUsable = false;
                     message = "Tài khoản đã bị khóa, vui lòng liên hệ quản trị viên qua Zalo theo số liên hệ 0966963030 để kích hoạt lại tài khoản.";
                     break;

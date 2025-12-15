@@ -13,7 +13,7 @@ namespace WorkFlow.Application.Features.Authentication.Commands
 {
     public class LoginCommand : IRequest<Result<LoginResultDto>>
     {
-        public string Type { get; set; } = default!;
+        public string Type { get; set; } = AccountProvider.Local.ToString();
         public string? Email { get; set; }
         public string? Password { get; set; }
         public string? Token { get; set; }
