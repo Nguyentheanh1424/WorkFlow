@@ -74,12 +74,12 @@ namespace WorkFlow.Application.Features.Boards.Commands
             await _permission.Workspace.EnsureMemberAsync(workSpace.Id, userId);
 
             var board = Board.Create(
-                request.Board.WorkspaceId,
-                userId,
-                request.Board.Title,
-                request.Board.Visibility,
-                request.Board.Description,
-                request.Board.Background
+                workspaceId: request.Board.WorkspaceId,
+                ownerId: userId,
+                title: request.Board.Title,
+                visibility: request.Board.Visibility,
+                background: request.Board.Background,
+                description: request.Board.Description
             );
 
             await _boardRepository.AddAsync(board);
