@@ -17,6 +17,9 @@ namespace WorkFlow.Domain.Entities
         public bool Pinned { get; set; }
         public bool IsArchived { get; set; }
 
+        private readonly List<BoardMember> _members = new();
+        public IReadOnlyCollection<BoardMember> Members => _members.AsReadOnly();
+
         protected Board() { }
 
         public static Board Create(Guid workspaceId, Guid ownerId, string title, VisibilityBoard visibility,
