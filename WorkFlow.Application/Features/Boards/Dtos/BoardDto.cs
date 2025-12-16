@@ -6,6 +6,7 @@ namespace WorkFlow.Application.Features.Boards.Dtos
 {
     public class BoardDto : IMapFrom<Board>
     {
+        public Guid Id { get; set; }
         public Guid WorkspaceId { get; set; }
         public Guid OwnerId { get; set; }
 
