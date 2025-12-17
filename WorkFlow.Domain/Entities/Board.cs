@@ -14,6 +14,8 @@ namespace WorkFlow.Domain.Entities
         public string? Background { get; set; }
         public string? Description { get; set; }
 
+        public int[]? Label { get; set; }
+
         public bool Pinned { get; set; }
         public bool IsArchived { get; set; }
 
@@ -23,7 +25,7 @@ namespace WorkFlow.Domain.Entities
         protected Board() { }
 
         public static Board Create(Guid workspaceId, Guid ownerId, string title, VisibilityBoard visibility,
-                                   string? background = null, string? description = null)
+                                   string? background = null, string? description = null, int[]? label = null)
         {
             return new Board
             {
@@ -33,6 +35,7 @@ namespace WorkFlow.Domain.Entities
                 Visibility = visibility,
                 Background = background,
                 Description = description,
+                Label = label,
                 Pinned = false,
                 IsArchived = false
             };
@@ -56,6 +59,11 @@ namespace WorkFlow.Domain.Entities
         public void SetDescription(string? description)
         {
             Description = description;
+        }
+
+        public void UpdateLabels(int[]? labels)
+        {
+            Label = labels;
         }
 
         public void Pin() => Pinned = true;

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using WorkFlow.Application.Features.Boards.Commands;
 using WorkFlow.Application.Features.Boards.Queries;
+using WorkFlow.Application.Features.Cards.Commands;
 using WorkFlow.Domain.Enums;
 
 namespace WorkFlow.API.Controllers
@@ -101,6 +102,16 @@ namespace WorkFlow.API.Controllers
         public async Task<IActionResult> UpdateBackground(Guid boardId, [FromBody] string background)
         {
             var result = await _mediator.Send(new UpdateBoardBackgroundCommand(boardId, background));
+            return result.IsSuccess ? Ok(result) : BadRequest(result);
+        }
+
+        [HttpPut("{boardId:guid}/Labels")]
+        [SwaggerOperation(Summary = "Cập nhật nhãn (labels) cho Board")]
+        public async Task<IActionResult> UpdateLabels(Guid boardId, [FromBody] int[] labels)
+        {
+            var command = new UpdateBoardLabelsCommand(boardId, labels);
+
+            var result = await _mediator.Send(command);
             return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
 

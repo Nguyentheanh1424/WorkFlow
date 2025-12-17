@@ -79,7 +79,8 @@ namespace WorkFlow.Application.Features.Boards.Commands
                 title: request.Board.Title,
                 visibility: request.Board.Visibility,
                 background: request.Board.Background,
-                description: request.Board.Description
+                description: request.Board.Description,
+                label: request.Board.Label
             );
 
             await _boardRepository.AddAsync(board);

@@ -16,6 +16,8 @@ namespace WorkFlow.Application.Features.Boards.Dtos
         public string? Background { get; set; }
         public string? Description { get; set; }
 
+        public int[]? Label { get; set; }
+
         public bool Pinned { get; set; }
         public bool IsArchived { get; set; }
     }

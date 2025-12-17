@@ -78,7 +78,8 @@ namespace WorkFlow.Application.Features.Boards.Commands
                 title: $"{sourceBoard.Title} (Copy)",
                 visibility: sourceBoard.Visibility,
                 background: sourceBoard.Background,
-                description: sourceBoard.Description
+                description: sourceBoard.Description,
+                label: sourceBoard.Label
             );
 
             await _boardRepository.AddAsync(newBoard);
