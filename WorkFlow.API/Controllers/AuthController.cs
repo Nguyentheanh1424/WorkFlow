@@ -66,6 +66,30 @@ namespace WorkFlow.API.Controllers
             return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
 
+        [HttpPost("LinkOAuth")]
+        [Authorize]
+        [SwaggerOperation(
+            Summary = "Liên kết đăng nhập mạng xã hội",
+            Description = "Liên kết Google hoặc Facebook với tài khoản hiện tại."
+        )]
+        public async Task<IActionResult> LinkOAuth([FromBody] LinkOAuthCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return result.IsSuccess ? Ok(result) : BadRequest(result);
+        }
+
+        [HttpPost("UnlinkOAuth")]
+        [Authorize]
+        [SwaggerOperation(
+            Summary = "Hủy liên kết đăng nhập mạng xã hội",
+            Description = "Hủy liên kết Google hoặc Facebook khỏi tài khoản hiện tại."
+        )]
+        public async Task<IActionResult> UnlinkOAuth([FromBody] UnlinkOAuthCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return result.IsSuccess ? Ok(result) : BadRequest(result);
+        }
+
         [HttpPost("RefreshToken")]
         [AllowAnonymous]
         [SwaggerOperation(

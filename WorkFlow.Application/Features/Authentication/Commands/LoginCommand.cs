@@ -44,97 +44,132 @@ namespace WorkFlow.Application.Features.Authentication.Commands
 
         public Task<Result<LoginResultDto>> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
-            return request.Type.ToLower() switch
+            var type = request.Type?.Trim().ToLowerInvariant();
+
+            return type switch
             {
                 "local" => HandleLocalLogin(request, cancellationToken),
-                "google" => HandleGoogleLogin(request, cancellationToken),
-                "facebook" => HandleFacebookLogin(request, cancellationToken),
-                _ => throw new NotSupportedException($"Login type '{request.Type}' is not supported.")
+                "google" => HandleOAuthLogin(request, AccountProvider.Google, cancellationToken),
+                "facebook" => HandleOAuthLogin(request, AccountProvider.Facebook, cancellationToken),
+                _ => throw new NotSupportedException("Chỉ hỗ trợ local, google hoặc facebook.")
             };
         }
 
         private async Task<Result<LoginResultDto>> HandleLocalLogin(LoginCommand request, CancellationToken cancellationToken)
         {
+            if (string.IsNullOrWhiteSpace(request.Email))
+                throw new AppException("Email không được để trống.");
+
+            if (string.IsNullOrWhiteSpace(request.Password))
+                throw new AppException("Mật khẩu không được để trống.");
+
             var user = await _userRepository.FirstOrDefaultAsync(u => u.Email == request.Email)
                 ?? throw new NotFoundException("Email chưa được đăng ký người dùng.");
 
-            var auth = await _authRepository.FirstOrDefaultAsync(a => a.UserId == user.Id && a.Provider == EnumExtensions.GetName(AccountProvider.Local))
+            var providerName = EnumExtensions.GetName(AccountProvider.Local);
+
+            var auth = await _authRepository.FirstOrDefaultAsync(a => a.UserId == user.Id && a.Provider == providerName)
                 ?? throw new AppException("Tài khoản chưa thiết lập phương thức đăng nhập này.");
 
-            var (isUsable, _message) = auth.IsActive();
+            var (isUsable, message) = auth.IsActive();
             if (!isUsable)
-                throw new ForbiddenAccessException(_message);
+                throw new ForbiddenAccessException(message);
 
             var (isLocked, remaining) = auth.IsLocked();
             if (isLocked)
                 throw new ForbiddenAccessException($"Tài khoản bị khóa trong {remaining} phút.");
 
-            var isLoginValid = PasswordHasher.Verify(request.Password!, auth.PasswordHash!, auth.Salt!);
+            var isLoginValid = PasswordHasher.Verify(request.Password, auth.PasswordHash, auth.Salt);
             if (!isLoginValid)
             {
-                var message = auth.MarkLoginFailed();
+                var lockMessage = auth.MarkLoginFailed();
                 await _authRepository.UpdateAsync(auth);
                 await _uow.SaveChangesAsync(cancellationToken);
-                throw new UnauthorizedException($"Mật khẩu không đúng. " +
-                    $"{message}");
+
+                throw new UnauthorizedException($"Mật khẩu không đúng. {lockMessage}");
             }
 
             auth.MarkLoginSuccess();
 
             var (accessToken, refreshToken) = await _tokenService.IssueAsync(user.Id, AccountProvider.Local);
 
-            int refreshTokenExpiryDays = int.TryParse(_configuration["Jwt:RefreshTokenDays"], out int value) ? value : 7;
-
+            int refreshTokenExpiryDays = GetRefreshTokenExpiryDays();
             auth.SetRefreshToken(refreshToken, refreshTokenExpiryDays);
+
             await _authRepository.UpdateAsync(auth);
             await _uow.SaveChangesAsync(cancellationToken);
 
-            var data = new LoginResultDto
+            return Result<LoginResultDto>.Success(new LoginResultDto
             {
                 UserId = user.Id,
                 Provider = auth.Provider,
                 AccessToken = accessToken,
                 RefreshToken = refreshToken
+            }, "Đăng nhập thành công");
+        }
+
+        private async Task<Result<LoginResultDto>> HandleOAuthLogin(
+            LoginCommand request,
+            AccountProvider provider,
+            CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(request.Token))
+                throw new AppException("Token không được để trống.");
+
+            OAuthProfileDto profile = provider switch
+            {
+                AccountProvider.Google => await _oAuthVerifier.VerifyGoogleAsync(request.Token),
+                AccountProvider.Facebook => await _oAuthVerifier.VerifyFacebookAsync(request.Token),
+                _ => throw new NotSupportedException()
             };
 
-            return Result<LoginResultDto>.Success(data, "Đăng nhập thành công");
+            return await HandleOAuth(profile, provider, cancellationToken);
         }
 
-        private async Task<Result<LoginResultDto>> HandleGoogleLogin(LoginCommand request, CancellationToken cancellationToken)
+        private async Task<Result<LoginResultDto>> HandleOAuth(
+            OAuthProfileDto profile,
+            AccountProvider provider,
+            CancellationToken cancellationToken)
         {
-            var profile = await _oAuthVerifier.VerifyGoogleAsync(request.Token!);
-            return await HandleOAuth(profile, AccountProvider.Google, cancellationToken);
-        }
+            var providerName = EnumExtensions.GetName(provider);
 
-        private async Task<Result<LoginResultDto>> HandleFacebookLogin(LoginCommand request, CancellationToken cancellationToken)
-        {
-            var profile = await _oAuthVerifier.VerifyFacebookAsync(request.Token!);
-            return await HandleOAuth(profile, AccountProvider.Facebook, cancellationToken);
-        }
+            var auth = await _authRepository.FirstOrDefaultAsync(a =>
+                a.Provider == providerName &&
+                a.ProviderUid == profile.Uid);
 
-        private async Task<Result<LoginResultDto>> HandleOAuth(OAuthProfileDto profile, AccountProvider provider, CancellationToken cancellationToken)
-        {
-            var auth = await _authRepository.FirstOrDefaultAsync(a => a.ProviderUid == profile.Uid && a.Provider == EnumExtensions.GetName(provider))
-                ?? throw new NotFoundException("Chưa tạo tài khoản hoặc chưa kết nối phương thức đăng nhập");
+            if (auth == null)
+                throw new UnauthorizedException("Thông tin đăng nhập không hợp lệ.");
+
+            var (isUsable, message) = auth.IsActive();
+            if (!isUsable)
+                throw new ForbiddenAccessException(message);
+
+            var (isLocked, remaining) = auth.IsLocked();
+            if (isLocked)
+                throw new ForbiddenAccessException($"Tài khoản bị khóa trong {remaining} phút.");
+
+            auth.MarkLoginSuccess();
 
             var (accessToken, refreshToken) = await _tokenService.IssueAsync(auth.UserId, provider);
 
-            int refreshTokenExpiryDays = int.TryParse(_configuration["Jwt:RefreshTokenDays"], out int value) ? value : 7;
-
+            int refreshTokenExpiryDays = GetRefreshTokenExpiryDays();
             auth.SetRefreshToken(refreshToken, refreshTokenExpiryDays);
-            auth.MarkLoginSuccess();
+
             await _authRepository.UpdateAsync(auth);
             await _uow.SaveChangesAsync(cancellationToken);
 
-            var data = new LoginResultDto
+            return Result<LoginResultDto>.Success(new LoginResultDto
             {
                 UserId = auth.UserId,
                 Provider = auth.Provider,
                 AccessToken = accessToken,
                 RefreshToken = refreshToken
-            };
+            }, "Đăng nhập thành công");
+        }
 
-            return Result<LoginResultDto>.Success(data, "Đăng nhập thành công");
+        private int GetRefreshTokenExpiryDays()
+        {
+            return int.TryParse(_configuration["Jwt:RefreshTokenDays"], out int value) ? value : 7;
         }
     }
 }
