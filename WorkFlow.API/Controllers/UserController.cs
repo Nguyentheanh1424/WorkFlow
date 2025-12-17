@@ -19,6 +19,25 @@ namespace WorkFlow.API.Controllers
             _mediator = mediator;
         }
 
+        [HttpGet]
+        [SwaggerOperation(
+            Summary = "Lấy danh sách người dùng",
+            Description = "Hỗ trợ tìm kiếm theo tên/số điện thoại/email và phân trang"
+        )]
+        public async Task<IActionResult> GetUsers([FromQuery] GetUsersRequest request)
+        {
+            var query = new GetUsersQuery(
+                request.Search,
+                request.PageIndex,
+                request.PageSize
+            );
+
+            var result = await _mediator.Send(query);
+
+            return result.IsSuccess ? Ok(result) : BadRequest(result);
+        }
+
+
         [HttpGet("Me")]
         [SwaggerOperation(
             Summary = "Lấy thông tin người dùng hiện tại"
@@ -73,6 +92,15 @@ namespace WorkFlow.API.Controllers
             var result = await _mediator.Send(command);
             return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
+    }
+
+    public class GetUsersRequest
+    {
+        public string? Search { get; set; }
+
+        public int PageIndex { get; set; } = 1;
+
+        public int PageSize { get; set; } = 10;
     }
 
     public class UpdateUserNameRequest
