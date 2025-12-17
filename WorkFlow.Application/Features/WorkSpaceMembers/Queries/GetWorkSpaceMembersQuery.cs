@@ -57,6 +57,7 @@ namespace WorkFlow.Application.Features.WorkSpaceMembers.Queries
                 {
                     UserId = m.UserId,
                     Name = user?.Name ?? string.Empty,
+                    Email = user?.Email ?? string.Empty,
                     Role = m.Role,
                     JoinedAt = m.JoinedAt
                 };

@@ -6,6 +6,7 @@ namespace WorkFlow.Application.Features.WorkSpaceMembers.Dtos
     {
         public Guid UserId { get; set; }
         public string Name { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
         public WorkSpaceRole Role { get; set; }
         public DateTime JoinedAt { get; set; }
     }
