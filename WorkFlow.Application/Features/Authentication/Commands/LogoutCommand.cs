@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using WorkFlow.Application.Common.Exceptions;
+using WorkFlow.Application.Common.Interfaces.Auth;
 using WorkFlow.Application.Common.Interfaces.Repositories;
 using WorkFlow.Application.Common.Interfaces.Services;
 using WorkFlow.Domain.Common;
@@ -9,26 +10,28 @@ namespace WorkFlow.Application.Features.Authentication.Commands
 {
     public class LogoutCommand : IRequest<Result>
     {
-        public string Provider { get; set; } = default!;
         public string RefreshToken { get; set; } = default!;
     }
 
     public class LogoutCommandHandler : IRequestHandler<LogoutCommand, Result>
     {
         private readonly IRepository<AccountAuth, Guid> _authRepository;
+        private readonly ICurrentUserService _currentUserService;
         private readonly IUnitOfWork _uow;
 
         public LogoutCommandHandler(
             ITokenService tokenService,
+            ICurrentUserService currentUserService,
             IUnitOfWork uow)
         {
             _uow = uow;
+            _currentUserService = currentUserService;
             _authRepository = _uow.GetRepository<AccountAuth, Guid>();
         }
         public async Task<Result> Handle(LogoutCommand request, CancellationToken cancellationToken)
         {
             var auth = await _authRepository.FirstOrDefaultAsync(a =>
-                a.Provider == request.Provider &&
+                a.Provider == _currentUserService.Provider &&
                 a.RefreshToken == request.RefreshToken)
                 ?? throw new UnauthorizedException("Token không hợp lệ");
 
