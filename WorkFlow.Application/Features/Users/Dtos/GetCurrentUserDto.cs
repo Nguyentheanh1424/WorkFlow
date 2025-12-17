@@ -13,5 +13,9 @@ namespace WorkFlow.Application.Features.Users.Dtos
 
         public string AvatarUrl { get; set; } = string.Empty;
         public DateTime? DateOfBirth { get; set; }
+
+        public bool IsGoogleLinked { get; set; }
+
+        public bool IsFacebookLinked { get; set; }
     }
 }
