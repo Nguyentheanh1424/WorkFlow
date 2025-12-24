@@ -11,6 +11,7 @@ using WorkFlow.Infrastructure.Auth;
 using WorkFlow.Infrastructure.Persistence;
 using WorkFlow.Infrastructure.Repositories;
 using WorkFlow.Infrastructure.Services;
+using Supabase;
 
 namespace WorkFlow.Infrastructure
 {
@@ -42,7 +43,6 @@ namespace WorkFlow.Infrastructure
 
             // Đăng ký các dịch vụ khác
             services.AddScoped<IEmailService, EmailService>();
-            services.AddScoped<IFileStorageService, FileStorageService>();
             services.AddSingleton<IDateTimeService, DateTimeService>();
             services.AddScoped<IOtpService, OtpService>();
             services.AddHttpClient<IOAuthVerifier, OAuthVerifier>();
@@ -50,6 +50,31 @@ namespace WorkFlow.Infrastructure
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IHubPermissionService, HubPermissionService>();
             services.AddHttpClient<IAvatarGenerator, DiceBearAvatarGenerator>();
+
+
+            // Đăng ký Server Storage
+            var supabaseOptions = new SupabaseStorageOptions();
+            configuration.GetSection("Supabase").Bind(supabaseOptions);
+
+            services.AddSingleton(supabaseOptions);
+
+            services.AddSingleton(provider =>
+            {
+                var options = provider.GetRequiredService<SupabaseStorageOptions>();
+
+                var client = new Client(
+                    options.Url,
+                    options.AnonKey,
+                    new SupabaseOptions
+                    {
+                        AutoConnectRealtime = false
+                    }
+                );
+
+                return client;
+            });
+
+            services.AddScoped<IFileStorageService, FileStorageService>();
 
             //Đăng ký Cache
             var useRedis = bool.TryParse(configuration["Cache:UseRedis"], out var val) && val;
