@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using WorkFlow.Application.Features.Boards.Commands;
 using WorkFlow.Application.Features.Boards.Queries;
-using WorkFlow.Application.Features.Cards.Commands;
 using WorkFlow.Domain.Enums;
 
 namespace WorkFlow.API.Controllers

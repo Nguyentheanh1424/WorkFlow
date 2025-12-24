@@ -11,6 +11,9 @@
         public const string Archived = "Board.Archived";
         public const string Restored = "Board.Restored";
 
+        public const string UploadAttachment = "Board.Upload.Attachment";
+        public const string RemoveAttachment = "Board.Remove.Attachment";
+
         public const string MemberAdded = "Board.Member.Added";
         public const string MemberRemoved = "Board.Member.Removed";
         public const string MemberUpdateRole = "Board.Member.Update.Role";
