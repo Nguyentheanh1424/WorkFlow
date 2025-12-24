@@ -9,9 +9,9 @@ namespace WorkFlow.Application.Features.Attachments.Dtos
         public Guid CardId { get; set; }
         public Guid UserId { get; set; }
 
-        public string FileType { get; set; } = "";
-        public string FileUrl { get; set; } = "";
         public string FileName { get; set; } = "";
+        public string FileUrl { get; set; } = "";
+        public string FileType { get; set; } = "";
 
         public DateTime CreatedAt { get; set; }
     }
