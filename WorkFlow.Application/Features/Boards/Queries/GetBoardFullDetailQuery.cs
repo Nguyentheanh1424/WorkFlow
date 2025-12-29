@@ -70,8 +70,10 @@ namespace WorkFlow.Application.Features.Boards.Queries
 
             await _permission.EnsureViewerAsync(board.Id, userId);
 
-            var lists = await _listRepository.FindAsync(l =>
-                l.BoardId == board.Id && !l.IsArchived);
+            var lists = (await _listRepository
+                .FindAsync(l => l.BoardId == board.Id && !l.IsArchived))
+                .OrderBy(l => l.Position)
+                .ToList();
 
             var listIds = lists.Select(l => l.Id).ToList();
 
@@ -79,7 +81,11 @@ namespace WorkFlow.Application.Features.Boards.Queries
 
             if (listIds.Count > 0)
             {
-                cards = await _cardRepository.FindAsync(c => listIds.Contains(c.ListId));
+                cards = (await _cardRepository
+                        .FindAsync(c => listIds.Contains(c.ListId)))
+                        .OrderBy(c => c.ListId)
+                        .ThenBy(c => c.Position)
+                        .ToList();
             }
 
             var members = await _boardMemberRepository.FindAsync(m => m.BoardId == board.Id);
