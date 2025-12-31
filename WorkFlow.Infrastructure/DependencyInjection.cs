@@ -64,7 +64,7 @@ namespace WorkFlow.Infrastructure
 
                 var client = new Client(
                     options.Url,
-                    options.AnonKey,
+                    options.ServiceRoleKey,
                     new SupabaseOptions
                     {
                         AutoConnectRealtime = false

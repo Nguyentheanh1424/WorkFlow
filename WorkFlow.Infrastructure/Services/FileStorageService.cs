@@ -7,7 +7,7 @@ namespace WorkFlow.Infrastructure.Services
     public sealed class SupabaseStorageOptions
     {
         public string Url { get; set; } = default!;
-        public string AnonKey { get; set; } = default!;
+        public string ServiceRoleKey { get; set; } = default!;
         public string Bucket { get; set; } = "uploads";
     }
 
