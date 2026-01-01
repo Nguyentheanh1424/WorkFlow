@@ -63,7 +63,7 @@ namespace WorkFlow.Application.Features.Lists.Queries
             await _permission.EnsureViewerAsync(board.Id, userId);
 
             var lists = (await _listRepository.FindAsync(
-                    l => l.BoardId == board.Id && !l.IsArchived))
+                    l => l.BoardId == board.Id))
                 .OrderBy(l => l.Position)
                 .ToList();
 
