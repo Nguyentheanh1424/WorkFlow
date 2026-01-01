@@ -49,5 +49,12 @@ namespace WorkFlow.Domain.Entities
             ReminderEnabled = false;
             ReminderBeforeMinutes = null;
         }
+
+        public void RedoDeleted()
+        {
+            IsDeleted = false;
+            DeletedBy = null;
+            DeletedAt = null;
+        }
     }
 }

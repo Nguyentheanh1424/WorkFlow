@@ -80,5 +80,25 @@ namespace WorkFlow.Domain.Entities
             Label = labels;
         }
 
+        public (bool IsValid, string Message) IsValidRedo()
+        {
+            if (!IsDeleted || !DeletedAt.HasValue)
+                return (false, "");
+
+            var elapsed = DateTime.UtcNow - DeletedAt.Value;
+
+            if (elapsed > TimeSpan.FromSeconds(18))
+                return (false, "Thời gian khôi phục đã quá 18 giây.");
+
+            return (true, "");
+        }
+
+
+        public void RedoDeleted()
+        {
+            IsDeleted = false;
+            DeletedBy = null;
+            DeletedAt = null;
+        }
     }
 }

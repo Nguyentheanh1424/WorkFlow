@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using WorkFlow.Application.Features.Boards.Commands;
 using WorkFlow.Application.Features.Cards.Commands;
 using WorkFlow.Application.Features.Cards.Queries;
 
@@ -108,12 +109,27 @@ namespace WorkFlow.API.Controllers
         }
 
         [HttpDelete("{cardId:guid}")]
-        [SwaggerOperation(Summary = "Xoá card vĩnh viễn")]
+        [SwaggerOperation(Summary = "Xoá card (soft-delete)")]
         public async Task<IActionResult> Delete(Guid cardId)
         {
             var result = await _mediator.Send(new DeleteCardCommand(cardId));
             return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
+
+        [HttpPut("{cardId:guid}/Restore")]
+        [SwaggerOperation(
+            Summary = "Khôi phục card đã bị xoá (redo soft-delete)",
+            Description = """
+                Khôi phục lại card đã bị soft-delete.
+                Yêu cầu quyền Editor hoặc Owner của Board.
+                """
+        )]
+        public async Task<IActionResult> Restore(Guid cardId)
+        {
+            var result = await _mediator.Send(new RestoreCardCommand(cardId));
+            return result.IsSuccess ? Ok(result) : BadRequest(result);
+        }
+
     }
     public class UpdateCardDatesRequest
     {

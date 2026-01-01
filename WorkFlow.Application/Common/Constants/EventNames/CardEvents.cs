@@ -5,6 +5,7 @@
         public const string Created = "Card.Created";
         public const string Updated = "Card.Updated";
         public const string Moved = "Card.Moved";
+        public const string Restored = "Card.Restored";
 
         public const string AssigneeAdded = "Card.Assignee.Added";
         public const string AssigneeRemoved = "Card.Assignee.Removed";

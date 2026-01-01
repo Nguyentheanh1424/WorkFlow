@@ -26,5 +26,11 @@ namespace WorkFlow.Domain.Entities
         }
 
         public void MoveTo(int newPosition) => Position = newPosition;
+        public void RedoDeleted()
+        {
+            IsDeleted = false;
+            DeletedBy = null;
+            DeletedAt = null;
+        }
     }
 }
