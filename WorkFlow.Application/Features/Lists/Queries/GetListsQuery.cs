@@ -4,6 +4,7 @@ using MediatR;
 using WorkFlow.Application.Common.Interfaces.Auth;
 using WorkFlow.Application.Common.Interfaces.Repositories;
 using WorkFlow.Application.Common.Interfaces.Services;
+using WorkFlow.Application.Features.Cards.Dtos;
 using WorkFlow.Application.Features.Lists.Dtos;
 using WorkFlow.Domain.Common;
 using WorkFlow.Domain.Entities;
@@ -23,10 +24,11 @@ namespace WorkFlow.Application.Features.Lists.Queries
     }
 
     public class GetListsQueryHandler
-        : IRequestHandler<GetListsQuery, Result<List<ListDto>>>
+    : IRequestHandler<GetListsQuery, Result<List<ListDto>>>
     {
         private readonly IRepository<List, Guid> _listRepository;
         private readonly IRepository<Board, Guid> _boardRepository;
+        private readonly IRepository<Card, Guid> _cardRepository;
         private readonly IBoardPermissionService _permission;
         private readonly ICurrentUserService _currentUser;
         private readonly IMapper _mapper;
@@ -39,31 +41,57 @@ namespace WorkFlow.Application.Features.Lists.Queries
         {
             _listRepository = unitOfWork.GetRepository<List, Guid>();
             _boardRepository = unitOfWork.GetRepository<Board, Guid>();
+            _cardRepository = unitOfWork.GetRepository<Card, Guid>();
             _permission = permission;
             _currentUser = currentUser;
             _mapper = mapper;
         }
 
-        public async Task<Result<List<ListDto>>> Handle(GetListsQuery request, CancellationToken cancellationToken)
+        public async Task<Result<List<ListDto>>> Handle(
+            GetListsQuery request,
+            CancellationToken cancellationToken)
         {
-            if (_currentUser.UserId == null)
+            if (_currentUser.UserId is null)
                 return Result<List<ListDto>>.Failure("Không xác định được người dùng.");
 
             var userId = _currentUser.UserId.Value;
 
             var board = await _boardRepository.GetByIdAsync(request.BoardId);
-            if (board == null)
+            if (board is null)
                 return Result<List<ListDto>>.Failure("Board không tồn tại.");
 
             await _permission.EnsureViewerAsync(board.Id, userId);
 
-            var lists = await _listRepository.FindAsync(l => l.BoardId == board.Id);
+            var lists = (await _listRepository.FindAsync(
+                    l => l.BoardId == board.Id && !l.IsArchived))
+                .OrderBy(l => l.Position)
+                .ToList();
 
-            var ordered = lists.OrderBy(l => l.Position).ToList();
+            if (!lists.Any())
+                return Result<List<ListDto>>.Success(new List<ListDto>());
 
-            var dto = _mapper.Map<List<ListDto>>(ordered);
+            var listIds = lists.Select(l => l.Id).ToList();
 
-            return Result<List<ListDto>>.Success(dto);
+            var cards = (await _cardRepository.FindAsync(
+                    c => listIds.Contains(c.ListId)))
+                .OrderBy(c => c.ListId)
+                .ThenBy(c => c.Position)
+                .ToList();
+
+            var listDtos = _mapper.Map<List<ListDto>>(lists);
+            var cardDtos = _mapper.Map<List<CardDto>>(cards);
+
+            var cardLookup = cardDtos.GroupBy(c => c.ListId)
+                                     .ToDictionary(g => g.Key, g => g.ToList());
+
+            foreach (var listDto in listDtos)
+            {
+                listDto.Cards = cardLookup.TryGetValue(listDto.Id, out var listCards)
+                    ? listCards
+                    : new List<CardDto>();
+            }
+
+            return Result<List<ListDto>>.Success(listDtos);
         }
     }
 }
