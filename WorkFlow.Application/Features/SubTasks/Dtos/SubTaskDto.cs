@@ -12,6 +12,8 @@ namespace WorkFlow.Application.Features.SubTasks.Dtos
         public int Position { get; set; }
         public JobStatus Status { get; set; }
 
+        public DateTime? DueDate { get; set; }
+
         public List<Guid> Assignees { get; set; } = new();
     }
 }
