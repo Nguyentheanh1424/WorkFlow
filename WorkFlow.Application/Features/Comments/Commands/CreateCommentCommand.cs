@@ -47,6 +47,7 @@ namespace WorkFlow.Application.Features.Comments.Commands
         private readonly IRepository<Card, Guid> _cardRepository;
         private readonly IRepository<Comment, Guid> _commentRepository;
         private readonly IRepository<List, Guid> _listRepository;
+        private readonly IRepository<User, Guid> _userRepository;
 
         private readonly IPermissionService _permission;
         private readonly ICurrentUserService _currentUser;
@@ -63,7 +64,8 @@ namespace WorkFlow.Application.Features.Comments.Commands
             _unitOfWork = unitOfWork;
             _cardRepository = unitOfWork.GetRepository<Card, Guid>();
             _commentRepository = unitOfWork.GetRepository<Comment, Guid>();
-            _listRepository = _unitOfWork.GetRepository<List, Guid>();
+            _listRepository = unitOfWork.GetRepository<List, Guid>();
+            _userRepository = unitOfWork.GetRepository<User, Guid>();
 
             _permission = permission;
             _currentUser = currentUser;
@@ -71,12 +73,13 @@ namespace WorkFlow.Application.Features.Comments.Commands
             _mapper = mapper;
         }
 
-        public async Task<Result<CommentDto>> Handle(
-            CreateCommentCommand request,
-            CancellationToken cancellationToken)
+
+        public async Task<Result<CommentWithUserDto>> Handle(
+    CreateCommentCommand request,
+    CancellationToken cancellationToken)
         {
             if (_currentUser.UserId == null)
-                return Result<CommentDto>.Failure("Không xác định được người dùng.");
+                return Result<CommentWithUserDto>.Failure("Không xác định được người dùng.");
 
             var userId = _currentUser.UserId.Value;
 
@@ -85,8 +88,6 @@ namespace WorkFlow.Application.Features.Comments.Commands
 
             var list = await _listRepository.GetByIdAsync(card.ListId)
                 ?? throw new NotFoundException("Danh sách không tồn tại.");
-
-            var boardId = list.BoardId;
 
             await _permission.Card.EnsureCanCommentAsync(card.Id, userId);
 
@@ -99,7 +100,20 @@ namespace WorkFlow.Application.Features.Comments.Commands
             await _commentRepository.AddAsync(comment);
             await _unitOfWork.SaveChangesAsync();
 
-            var dto = _mapper.Map<CommentDto>(comment);
+            var user = await _userRepository.GetByIdAsync(userId);
+
+            var dto = new CommentWithUserDto
+            {
+                Id = comment.Id,
+                CardId = comment.CardId,
+                UserId = comment.UserId,
+                Content = comment.Content,
+                CreatedAt = comment.CreatedAt,
+                UpdatedAt = comment.UpdatedAt,
+
+                UserName = user?.Name ?? "Unknown",
+                UserAvatar = user?.AvatarUrl ?? string.Empty
+            };
 
             await _realtimeService.SendToBoardAsync(
                 boardId: list.BoardId,
@@ -107,7 +121,7 @@ namespace WorkFlow.Application.Features.Comments.Commands
                 payload: dto
             );
 
-            return Result<CommentDto>.Success(dto);
+            return Result<CommentWithUserDto>.Success(dto);
         }
     }
 }
