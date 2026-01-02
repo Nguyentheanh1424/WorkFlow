@@ -17,7 +17,7 @@ using WorkFlow.Domain.Entities;
 namespace WorkFlow.Application.Features.Comments.Queries
 {
     public record GetCommentsQuery(Guid CardId)
-        : IRequest<Result<List<CommentDto>>>;
+        : IRequest<Result<List<CommentWithUserDto>>>;
 
     public class GetCommentsQueryValidator
         : AbstractValidator<GetCommentsQuery>
@@ -31,10 +31,11 @@ namespace WorkFlow.Application.Features.Comments.Queries
     }
 
     public class GetCommentsQueryHandler
-        : IRequestHandler<GetCommentsQuery, Result<List<CommentDto>>>
+        : IRequestHandler<GetCommentsQuery, Result<List<CommentWithUserDto>>>
     {
         private readonly IRepository<Comment, Guid> _commentRepository;
         private readonly IRepository<Card, Guid> _cardRepository;
+        private readonly IRepository<User, Guid> _userRepository;
 
         private readonly IPermissionService _permission;
         private readonly ICurrentUserService _currentUser;
@@ -48,18 +49,19 @@ namespace WorkFlow.Application.Features.Comments.Queries
         {
             _commentRepository = unitOfWork.GetRepository<Comment, Guid>();
             _cardRepository = unitOfWork.GetRepository<Card, Guid>();
+            _userRepository = unitOfWork.GetRepository<User, Guid>();
 
             _permission = permission;
             _currentUser = currentUser;
             _mapper = mapper;
         }
 
-        public async Task<Result<List<CommentDto>>> Handle(
+        public async Task<Result<List<CommentWithUserDto>>> Handle(
             GetCommentsQuery request,
             CancellationToken cancellationToken)
         {
             if (_currentUser.UserId == null)
-                return Result<List<CommentDto>>.Failure("Không xác định được người dùng.");
+                return Result<List<CommentWithUserDto>>.Failure("Không xác định được người dùng.");
 
             var userId = _currentUser.UserId.Value;
 
@@ -76,9 +78,35 @@ namespace WorkFlow.Application.Features.Comments.Queries
                 .OrderBy(c => c.CreatedAt)
                 .ToList();
 
-            var dtos = _mapper.Map<List<CommentDto>>(ordered);
+            var userIds = ordered
+                .Select(c => c.UserId)
+                .Distinct()
+                .ToList();
 
-            return Result<List<CommentDto>>.Success(dtos);
+            var users = await _userRepository.FindAsync(
+                u => userIds.Contains(u.Id)
+            );
+
+            var userDict = users.ToDictionary(u => u.Id);
+
+            var dtos = ordered.Select(c => new CommentWithUserDto
+            {
+                Id = c.Id,
+                CardId = c.CardId,
+                UserId = c.UserId,
+                Content = c.Content,
+                CreatedAt = c.CreatedAt,
+                UpdatedAt = c.UpdatedAt,
+
+                UserName = userDict.TryGetValue(c.UserId, out var u)
+                    ? u.Name
+                    : "Unknown",
+                UserAvatar = userDict.TryGetValue(c.UserId, out var u2)
+                    ? u2.AvatarUrl
+                    : string.Empty
+            }).ToList();
+
+            return Result<List<CommentWithUserDto>>.Success(dtos);
         }
     }
 }

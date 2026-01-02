@@ -13,4 +13,11 @@ namespace WorkFlow.Application.Features.Comments.Dtos
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
     }
+
+    public class CommentWithUserDto : CommentDto
+    {
+        public string UserName { get; set; } = null!;
+        public string UserAvatar { get; set; } = null!;
+    }
+
 }
