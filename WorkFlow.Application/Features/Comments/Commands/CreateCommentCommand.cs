@@ -12,7 +12,7 @@ using WorkFlow.Domain.Entities;
 
 namespace WorkFlow.Application.Features.Comments.Commands
 {
-    public class CreateCommentCommand : IRequest<Result<Guid>>
+    public class CreateCommentCommand : IRequest<Result<CommentDto>>
     {
         public Guid CardId { get; private set; }
         public string Content { get; set; } = null!;
@@ -41,7 +41,7 @@ namespace WorkFlow.Application.Features.Comments.Commands
     }
 
     public class CreateCommentCommandHandler
-        : IRequestHandler<CreateCommentCommand, Result<Guid>>
+        : IRequestHandler<CreateCommentCommand, Result<CommentDto>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IRepository<Card, Guid> _cardRepository;
@@ -71,12 +71,12 @@ namespace WorkFlow.Application.Features.Comments.Commands
             _mapper = mapper;
         }
 
-        public async Task<Result<Guid>> Handle(
+        public async Task<Result<CommentDto>> Handle(
             CreateCommentCommand request,
             CancellationToken cancellationToken)
         {
             if (_currentUser.UserId == null)
-                return Result<Guid>.Failure("Không xác định được người dùng.");
+                return Result<CommentDto>.Failure("Không xác định được người dùng.");
 
             var userId = _currentUser.UserId.Value;
 
@@ -107,7 +107,7 @@ namespace WorkFlow.Application.Features.Comments.Commands
                 payload: dto
             );
 
-            return Result<Guid>.Success(comment.Id);
+            return Result<CommentDto>.Success(dto);
         }
     }
 }

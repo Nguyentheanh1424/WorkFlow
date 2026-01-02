@@ -13,7 +13,7 @@ using WorkFlow.Domain.Entities;
 
 namespace WorkFlow.Application.Features.Attachments.Commands
 {
-    public class UploadAttachmentCommand : IRequest<Result<Guid>>
+    public class UploadAttachmentCommand : IRequest<Result<AttachmentDto>>
     {
         public Guid CardId { get; private set; }
         public IFormFile File { get; set; } = default!;
@@ -67,7 +67,7 @@ namespace WorkFlow.Application.Features.Attachments.Commands
 
 
     public class UploadAttachmentCommandHandler
-        : IRequestHandler<UploadAttachmentCommand, Result<Guid>>
+        : IRequestHandler<UploadAttachmentCommand, Result<AttachmentDto>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IRepository<Card, Guid> _cardRepository;
@@ -100,12 +100,12 @@ namespace WorkFlow.Application.Features.Attachments.Commands
             _mapper = mapper;
         }
 
-        public async Task<Result<Guid>> Handle(
+        public async Task<Result<AttachmentDto>> Handle(
             UploadAttachmentCommand request,
             CancellationToken cancellationToken)
         {
             if (_currentUser.UserId == null)
-                return Result<Guid>.Failure("Không xác định được người dùng.");
+                return Result<AttachmentDto>.Failure("Không xác định được người dùng.");
 
             var userId = _currentUser.UserId.Value;
 
@@ -149,7 +149,7 @@ namespace WorkFlow.Application.Features.Attachments.Commands
                 payload
             );
 
-            return Result<Guid>.Success(attachment.Id);
+            return Result<AttachmentDto>.Success(payload);
         }
     }
 }
