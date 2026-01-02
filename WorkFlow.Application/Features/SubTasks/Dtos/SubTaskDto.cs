@@ -14,6 +14,9 @@ namespace WorkFlow.Application.Features.SubTasks.Dtos
 
         public DateTime? DueDate { get; set; }
 
+        public bool ReminderEnabled { get; set; }
+        public int? ReminderBeforeMinutes { get; set; }
+
         public List<Guid> Assignees { get; set; } = new();
     }
 }
