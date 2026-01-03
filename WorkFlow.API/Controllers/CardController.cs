@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using WorkFlow.Application.Features.Boards.Commands;
 using WorkFlow.Application.Features.Cards.Commands;
 using WorkFlow.Application.Features.Cards.Queries;
 

@@ -99,8 +99,9 @@ namespace WorkFlow.Application.Features.SubTasks.Commands
             await subTaskRepo.UpdateAsync(subTask);
             await _unitOfWork.SaveChangesAsync();
 
-            await _realtime.SendToBoardAsync(board.Id, TaskEvents.SubTaskUpdated, new
+            await _realtime.SendToBoardAsync(board.Id, "BoardNotification", new
             {
+                Action = TaskEvents.SubTaskUpdated,
                 SubTaskId = subTask.Id,
                 DueDate = request.DueDate,
                 ReminderEnabled = request.ReminderEnabled,

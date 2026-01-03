@@ -3,6 +3,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
+using Supabase;
 using WorkFlow.Application.Common.Exceptions;
 using WorkFlow.Application.Common.Interfaces.Auth;
 using WorkFlow.Application.Common.Interfaces.Repositories;
@@ -11,7 +12,6 @@ using WorkFlow.Infrastructure.Auth;
 using WorkFlow.Infrastructure.Persistence;
 using WorkFlow.Infrastructure.Repositories;
 using WorkFlow.Infrastructure.Services;
-using Supabase;
 
 namespace WorkFlow.Infrastructure
 {

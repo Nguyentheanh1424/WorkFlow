@@ -92,7 +92,7 @@ namespace WorkFlow.Application.Features.Boards.Commands
                 await _unitOfWork.SaveChangesAsync();
 
                 var boardDto = _mapper.Map<BoardDto>(newBoard);
-                await _realtime.SendToWorkspaceAsync(newBoard.WorkSpaceId, BoardEvents.Created, boardDto);
+                await _realtime.SendToWorkspaceAsync(newBoard.WorkSpaceId, "WorkspaceNotification", new { Action = BoardEvents.Created, Data = boardDto });
 
                 return Result<BoardDto>.Success(boardDto);
             }
@@ -145,8 +145,9 @@ namespace WorkFlow.Application.Features.Boards.Commands
 
             var dto = _mapper.Map<BoardDto>(newBoard);
 
-            await _realtime.SendToUserAsync(userId, WorkspaceEvents.BoardAdded, dto);
-            await _realtime.SendToWorkspaceAsync(newBoard.WorkSpaceId, WorkspaceEvents.BoardAdded, dto);
+
+            await _realtime.SendToUserAsync(userId, "UserNotification", new { Action = WorkspaceEvents.BoardAdded, Data = dto });
+            await _realtime.SendToWorkspaceAsync(newBoard.WorkSpaceId, "WorkspaceNotification", new { Action = WorkspaceEvents.BoardAdded, Data = dto });
 
             return Result<BoardDto>.Success(dto);
         }

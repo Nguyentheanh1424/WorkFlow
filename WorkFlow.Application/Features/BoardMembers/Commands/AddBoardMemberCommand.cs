@@ -93,10 +93,16 @@ namespace WorkFlow.Application.Features.BoardMembers.Commands
                 JoinedAt = member.JoinedAt
             };
 
+            var payload = new
+            {
+                Action = BoardEvents.MemberAdded,
+                Data = dto
+            };
+
             await _realtime.SendToUserAsync(
                 request.UserId,
-                BoardEvents.MemberAdded,
-                dto
+                "UserNotification",
+                payload
             );
 
             return Result.Success("Thêm thành viên thành công.");

@@ -94,8 +94,13 @@ namespace WorkFlow.Application.Features.Attachments.Commands
 
             await _realtime.SendToBoardAsync(
                 boardId: boardId,
-                method: BoardEvents.RemoveAttachment,
-                payload
+                "BoardNotification",
+                new
+                {
+                    Action = BoardEvents.RemoveAttachment,
+                    Data = payload
+                }
+
             );
 
             return Result<bool>.Success(true);

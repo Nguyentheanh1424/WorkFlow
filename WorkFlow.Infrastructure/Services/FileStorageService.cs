@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
-using WorkFlow.Application.Common.Interfaces.Services;
 using Supabase;
+using WorkFlow.Application.Common.Interfaces.Services;
 
 namespace WorkFlow.Infrastructure.Services
 {

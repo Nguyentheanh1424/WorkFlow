@@ -1,19 +1,12 @@
 ﻿using AutoMapper;
 using FluentValidation;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WorkFlow.Application.Common.Constants.EventNames;
 using WorkFlow.Application.Common.Exceptions;
 using WorkFlow.Application.Common.Interfaces.Auth;
 using WorkFlow.Application.Common.Interfaces.Repositories;
 using WorkFlow.Application.Common.Interfaces.Services;
 using WorkFlow.Application.Features.Boards.Dtos;
-using WorkFlow.Application.Features.Cards.Commands;
-using WorkFlow.Application.Features.Cards.Dtos;
 using WorkFlow.Domain.Common;
 using WorkFlow.Domain.Entities;
 
@@ -82,8 +75,8 @@ namespace WorkFlow.Application.Features.Boards.Commands
 
             var dto = _mapper.Map<BoardDto>(board);
 
-            await _realtimeService.SendToBoardAsync(board.Id, BoardEvents.Updated, dto);
-            await _realtimeService.SendToWorkspaceAsync(board.WorkSpaceId, BoardEvents.Updated, dto);
+            await _realtimeService.SendToBoardAsync(board.Id, "BoardNotification", new { Action = BoardEvents.Updated, Data = dto });
+            await _realtimeService.SendToWorkspaceAsync(board.WorkSpaceId, "WorkspaceNotification", new { Action = BoardEvents.Updated, Data = dto });
 
             return Result<BoardDto>.Success(dto);
         }

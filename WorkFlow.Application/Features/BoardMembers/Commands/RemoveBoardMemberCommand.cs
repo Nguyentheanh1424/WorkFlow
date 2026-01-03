@@ -71,8 +71,12 @@ namespace WorkFlow.Application.Features.BoardMembers.Commands
 
             await _realtime.SendToUserAsync(
                 request.UserId,
-                BoardEvents.MemberRemoved,
-                new { request.BoardId }
+                "UserNotification",
+                new
+                {
+                    Action = BoardEvents.MemberRemoved,
+                    Data = request.BoardId
+                }
             );
 
             return Result<bool>.Success(true);

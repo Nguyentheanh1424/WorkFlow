@@ -94,7 +94,7 @@ namespace WorkFlow.Application.Features.Lists.Commands
                 await _unitOfWork.SaveChangesAsync();
 
                 var dtoSimple = _mapper.Map<ListDto>(newList);
-                await _realtime.SendToBoardAsync(board.Id, ListEvents.Created, dtoSimple);
+                await _realtime.SendToBoardAsync(board.Id, "BoardNotification", new { Action = ListEvents.Created, Data = dtoSimple });
 
                 return Result<ListDto>.Success(dtoSimple);
             }
@@ -167,7 +167,7 @@ namespace WorkFlow.Application.Features.Lists.Commands
             await _unitOfWork.SaveChangesAsync();
 
             var dto = _mapper.Map<ListDto>(newList);
-            await _realtime.SendToBoardAsync(board.Id, ListEvents.Created, dto);
+            await _realtime.SendToBoardAsync(board.Id, "BoardNotification", new { Action = ListEvents.Created, Data = dto });
 
             return Result<ListDto>.Success(dto);
         }

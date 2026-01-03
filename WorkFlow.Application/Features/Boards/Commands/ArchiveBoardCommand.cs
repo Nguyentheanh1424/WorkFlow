@@ -68,8 +68,8 @@ namespace WorkFlow.Application.Features.Boards.Commands
 
             var dto = _mapper.Map<BoardDto>(board);
 
-            await _realtime.SendToBoardAsync(board.Id, BoardEvents.Archived, dto);
-            await _realtime.SendToWorkspaceAsync(board.WorkSpaceId, BoardEvents.Archived, dto);
+            await _realtime.SendToBoardAsync(board.Id, "BoardNotification", new { Action = BoardEvents.Archived, Data = dto });
+            await _realtime.SendToWorkspaceAsync(board.WorkSpaceId, "WorkspaceNotification", new { Action = BoardEvents.Archived, Data = dto });
 
             return Result.Success();
         }

@@ -110,9 +110,10 @@ namespace WorkFlow.Application.Features.Cards.Commands
 
             await _realtime.SendToBoardAsync(
                 board.Id,
-                CardEvents.Restored,
+                "BoardNotification",
                 new
                 {
+                    Action = CardEvents.Restored,
                     CardId = card.Id,
                     ListId = list.Id
                 });

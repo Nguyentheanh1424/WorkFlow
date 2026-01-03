@@ -144,9 +144,13 @@ namespace WorkFlow.Application.Features.Attachments.Commands
             var payload = _mapper.Map<AttachmentDto>(attachment);
 
             await _realtime.SendToBoardAsync(
-                boardId: boardId,   
-                method: BoardEvents.UploadAttachment,
-                payload
+                boardId: boardId,
+                "BoardNotification",
+                new
+                {
+                    Action = BoardEvents.UploadAttachment,
+                    Data = payload
+                }
             );
 
             return Result<AttachmentDto>.Success(payload);

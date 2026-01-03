@@ -97,8 +97,8 @@ namespace WorkFlow.Application.Features.WorkSpaceMembers.Commands
                 Status = true,
             };
 
-            await _realtimeService.SendToUserAsync(request.TargetUserId, WorkspaceEvents.MemberRemoved, payload);
-            await _realtimeService.SendToWorkspaceAsync(request.WorkspaceId, WorkspaceEvents.MemberRemoved, payload);
+            await _realtimeService.SendToUserAsync(request.TargetUserId, "UserNotification", new { Action = WorkspaceEvents.MemberRemoved, Data = payload });
+            await _realtimeService.SendToWorkspaceAsync(request.WorkspaceId, "WorkspaceNotification", new { Action = WorkspaceEvents.MemberRemoved, Data = payload });
 
             return Result.Success("Xoá thành viên thành công.");
         }

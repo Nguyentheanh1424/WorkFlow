@@ -89,7 +89,7 @@ namespace WorkFlow.Application.Features.Lists.Commands
 
             var dto = _mapper.Map<ListDto>(list);
 
-            await _realtime.SendToBoardAsync(board.Id, ListEvents.Updated, dto);
+            await _realtime.SendToBoardAsync(board.Id, "BoardNotification", new { Action = ListEvents.Updated, Data = dto });
 
             return Result<ListDto>.Success(dto);
         }

@@ -76,8 +76,12 @@ namespace WorkFlow.Application.Features.WorkSpaces.Commands
 
             await _realtimeService.SendToUserAsync(
                 userId,
-                WorkspaceEvents.Create,
-                dto
+                "UserNotification",
+                new
+                {
+                    Action = WorkspaceEvents.Create,
+                    Data = dto
+                }
             );
 
             return Result<WorkSpaceDto>.Success(dto);

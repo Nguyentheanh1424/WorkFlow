@@ -97,8 +97,8 @@ namespace WorkFlow.Application.Features.WorkSpaceMembers.Commands
             await _memberRepository.UpdateAsync(member);
             await _unitOfWork.SaveChangesAsync();
 
-            await _realtimeService.SendToUserAsync(request.UserId, WorkspaceEvents.MemberUpdateRole, payload);
-            await _realtimeService.SendToWorkspaceAsync(request.WorkspaceId, WorkspaceEvents.MemberUpdateRole, payload);
+            await _realtimeService.SendToUserAsync(request.UserId, "UserNotification", new { Action = WorkspaceEvents.MemberUpdateRole, Data = payload });
+            await _realtimeService.SendToWorkspaceAsync(request.WorkspaceId, "WorkspaceNotification", new { Action = WorkspaceEvents.MemberUpdateRole, Data = payload });
 
             return Result.Success("Cập nhật quyền thành công.");
         }

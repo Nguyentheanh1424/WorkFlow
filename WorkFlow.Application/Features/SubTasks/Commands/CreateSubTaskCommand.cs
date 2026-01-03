@@ -89,7 +89,7 @@ namespace WorkFlow.Application.Features.SubTasks.Commands
 
             var dto = _mapper.Map<SubTaskDto>(subTask);
 
-            await _realtime.SendToBoardAsync(board.Id, TaskEvents.SubTaskCreated, dto);
+            await _realtime.SendToBoardAsync(board.Id, "BoardNotification", new { Action = TaskEvents.SubTaskCreated, Data = dto });
 
             return Result<SubTaskDto>.Success(dto);
         }

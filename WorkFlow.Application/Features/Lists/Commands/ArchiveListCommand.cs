@@ -74,7 +74,7 @@ namespace WorkFlow.Application.Features.Lists.Commands
 
             var dto = _mapper.Map<ListDto>(list);
 
-            await _realtime.SendToBoardAsync(board.Id, ListEvents.Archived, dto);
+            await _realtime.SendToBoardAsync(board.Id, "BoardNotification", new { Action = ListEvents.Archived, Data = dto });
 
             return Result<ListDto>.Success(dto);
         }

@@ -78,8 +78,9 @@ namespace WorkFlow.Application.Features.Tasks.Commands
             await taskRepo.UpdateAsync(task);
             await _unitOfWork.SaveChangesAsync();
 
-            await _realtime.SendToBoardAsync(board.Id, TaskEvents.Updated, new
+            await _realtime.SendToBoardAsync(board.Id, "BoardNotification", new
             {
+                Action = TaskEvents.Updated,
                 TaskId = task.Id,
                 Title = request.Title
             });

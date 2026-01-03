@@ -114,8 +114,9 @@ namespace WorkFlow.Application.Features.Cards.Commands
 
             var dto = _mapper.Map<CardDto>(movedCard);
 
-            await _realtime.SendToBoardAsync(board.Id, CardEvents.Moved, new
+            await _realtime.SendToBoardAsync(board.Id, "BoardNotification", new
             {
+                Action = CardEvents.Moved,
                 CardId = movedCard.Id,
                 FromListId = fromListId,
                 ToListId = request.ToListId,

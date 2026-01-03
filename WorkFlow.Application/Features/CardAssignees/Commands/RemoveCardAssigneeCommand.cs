@@ -75,8 +75,9 @@ namespace WorkFlow.Application.Features.CardAssignees.Commands
             await assigneeRepo.DeleteAsync(assignee);
             await _unitOfWork.SaveChangesAsync();
 
-            await _realtime.SendToBoardAsync(board.Id, CardEvents.AssigneeRemoved, new
+            await _realtime.SendToBoardAsync(board.Id, "BoardNotification", new
             {
+                Action = CardEvents.AssigneeRemoved,
                 CardId = card.Id,
                 RemovedUserId = request.UserId
             });

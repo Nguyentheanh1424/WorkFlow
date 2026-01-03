@@ -163,9 +163,9 @@ namespace WorkFlow.Application.Features.Lists.Commands
 
             var dto = _mapper.Map<ListDto>(list);
 
-            await _realtime.SendToBoardAsync(sourceBoard.Id, ListEvents.Deleted, dto);
+            await _realtime.SendToBoardAsync(sourceBoard.Id, "BoardNotification", new { Action = ListEvents.Deleted, Data = dto });
 
-            await _realtime.SendToBoardAsync(targetBoard.Id, ListEvents.Created, dto);
+            await _realtime.SendToBoardAsync(targetBoard.Id, "BoardNotification", new { Action = ListEvents.Created, Data = dto });
 
             return Result<ListDto>.Success(dto);
         }

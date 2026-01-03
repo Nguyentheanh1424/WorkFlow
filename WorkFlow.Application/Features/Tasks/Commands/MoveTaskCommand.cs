@@ -89,8 +89,9 @@ namespace WorkFlow.Application.Features.Tasks.Commands
 
             await _unitOfWork.SaveChangesAsync();
 
-            await _realtime.SendToBoardAsync(board.Id, TaskEvents.Moved, new
+            await _realtime.SendToBoardAsync(board.Id, "BoardNotification", new
             {
+                Action = TaskEvents.Moved,
                 TaskId = task.Id,
                 NewPosition = newPos,
                 CardId = card.Id

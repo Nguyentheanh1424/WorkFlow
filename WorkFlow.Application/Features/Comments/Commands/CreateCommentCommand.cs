@@ -117,8 +117,12 @@ namespace WorkFlow.Application.Features.Comments.Commands
 
             await _realtimeService.SendToBoardAsync(
                 boardId: list.BoardId,
-                method: CommentEvents.Added,
-                payload: dto
+                "BoardNotification",
+                new
+                {
+                    Action = CommentEvents.Added,
+                    Data = dto
+                }
             );
 
             return Result<CommentWithUserDto>.Success(dto);

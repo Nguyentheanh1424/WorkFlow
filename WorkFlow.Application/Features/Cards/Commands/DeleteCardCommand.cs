@@ -97,8 +97,9 @@ namespace WorkFlow.Application.Features.Cards.Commands
 
             await _unitOfWork.SaveChangesAsync();
 
-            await _realtime.SendToBoardAsync(board.Id, CardEvents.Deleted, new
+            await _realtime.SendToBoardAsync(board.Id, "BoardNotification", new
             {
+                Action = CardEvents.Deleted,
                 CardId = card.Id,
                 ListId = list.Id
             });

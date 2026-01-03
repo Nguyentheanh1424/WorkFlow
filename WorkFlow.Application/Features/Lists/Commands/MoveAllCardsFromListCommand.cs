@@ -95,9 +95,10 @@ namespace WorkFlow.Application.Features.Lists.Commands
 
             await _realtime.SendToBoardAsync(
                 targetList.BoardId,
-                BoardEvents.ListMoved,
+                "BoardNotification",
                 new
                 {
+                    Action = BoardEvents.ListMoved,
                     SourceListId = sourceList.Id,
                     TargetListId = targetList.Id,
                     CardIds = movedIds

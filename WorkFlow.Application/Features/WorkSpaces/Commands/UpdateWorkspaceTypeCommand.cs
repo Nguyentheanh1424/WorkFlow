@@ -65,9 +65,10 @@ namespace WorkFlow.Application.Features.WorkSpaces.Commands
 
             await _realtime.SendToWorkspaceAsync(
                 workspace.Id,
-                WorkspaceEvents.Updated,
+                "WorkspaceNotification",
                 new
                 {
+                    Action = WorkspaceEvents.Updated,
                     WorkspaceId = workspace.Id,
                     Type = workspace.Type
                 }

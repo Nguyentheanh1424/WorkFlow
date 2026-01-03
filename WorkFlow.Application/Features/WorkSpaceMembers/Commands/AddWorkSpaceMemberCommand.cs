@@ -81,8 +81,8 @@ namespace WorkFlow.Application.Features.WorkSpaceMembers.Commands
             await _memberRepository.AddAsync(member);
             await _unitOfWork.SaveChangesAsync();
 
-            await _realtimeService.SendToUserAsync(request.UserId, WorkspaceEvents.MemberAdded, member);
-            await _realtimeService.SendToWorkspaceAsync(request.WorkspaceId, WorkspaceEvents.MemberAdded, member);
+            await _realtimeService.SendToUserAsync(request.UserId, "UserNotification", new { Action = WorkspaceEvents.MemberAdded, Data = member });
+            await _realtimeService.SendToWorkspaceAsync(request.WorkspaceId, "WorkspaceNotification", new { Action = WorkspaceEvents.MemberAdded, Data = member });
 
             return Result.Success("Thêm thành viên thành công.");
         }

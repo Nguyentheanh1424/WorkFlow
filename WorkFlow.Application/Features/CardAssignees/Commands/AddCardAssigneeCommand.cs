@@ -77,11 +77,13 @@ namespace WorkFlow.Application.Features.CardAssignees.Commands
             await assigneeRepo.AddAsync(assignee);
             await _unitOfWork.SaveChangesAsync();
 
-            await _realtime.SendToBoardAsync(board.Id, CardEvents.AssigneeAdded, new
-            {
-                CardId = card.Id,
-                AddedUserId = request.UserId
-            });
+            await _realtime.SendToBoardAsync(board.Id, "BoardNotification",
+                new
+                {
+                    Action = CardEvents.AssigneeAdded,
+                    CardId = card.Id,
+                    AddedUserId = request.UserId
+                });
 
             return Result.Success();
         }

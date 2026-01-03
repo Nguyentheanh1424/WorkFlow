@@ -80,8 +80,9 @@ namespace WorkFlow.Application.Features.SubTasks.Commands
 
             await _unitOfWork.SaveChangesAsync();
 
-            await _realtime.SendToBoardAsync(board.Id, TaskEvents.SubTaskDeleted, new
+            await _realtime.SendToBoardAsync(board.Id, "BoardNotification", new
             {
+                Action = TaskEvents.SubTaskDeleted,
                 SubTaskId = subTask.Id,
                 TaskId = task.Id
             });

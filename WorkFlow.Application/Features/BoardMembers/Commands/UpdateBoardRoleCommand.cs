@@ -87,8 +87,8 @@ namespace WorkFlow.Application.Features.BoardMembers.Commands
 
             await _realtime.SendToUserAsync(
                 request.UserId,
-                BoardEvents.MemberUpdateRole,
-                new { request.BoardId }
+                "UserNotification",
+                new { Action = BoardEvents.MemberUpdateRole, Data = request.BoardId }
             );
 
             return Result.Success("Cập nhật quyền thành viên Board thành công.");

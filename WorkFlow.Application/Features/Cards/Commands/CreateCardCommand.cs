@@ -85,7 +85,7 @@ namespace WorkFlow.Application.Features.Cards.Commands
 
             var dto = _mapper.Map<CardDto>(card);
 
-            await _realtime.SendToBoardAsync(board.Id, CardEvents.Created, dto);
+            await _realtime.SendToBoardAsync(board.Id, "BoardNotification", new { Action = CardEvents.Created, Data = dto });
 
             return Result<CardDto>.Success(dto);
         }
