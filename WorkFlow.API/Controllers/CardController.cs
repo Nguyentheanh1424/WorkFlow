@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using WorkFlow.Application.Features.Cards.Commands;
 using WorkFlow.Application.Features.Cards.Queries;
+using WorkFlow.Domain.Enums;
 
 namespace WorkFlow.API.Controllers
 {
@@ -55,6 +56,14 @@ namespace WorkFlow.API.Controllers
         public async Task<IActionResult> UpdateTitle(Guid cardId, [FromBody] string title)
         {
             var result = await _mediator.Send(new UpdateCardTitleCommand(cardId, title));
+            return result.IsSuccess ? Ok(result) : BadRequest(result);
+        }
+
+        [HttpPut("{cardId:guid}/Status")]
+        [SwaggerOperation(Summary = "Cập nhật tiêu đề Card")]
+        public async Task<IActionResult> UpdateStatus(Guid cardId, [FromBody] JobStatus status)
+        {
+            var result = await _mediator.Send(new UpdateCardStatusCommand(cardId, status));
             return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
 
