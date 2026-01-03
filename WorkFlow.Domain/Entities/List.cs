@@ -12,14 +12,14 @@ namespace WorkFlow.Domain.Entities
 
         protected List() { }
 
-        public static List Create(Guid boardId, string title, int position)
+        public static List Create(Guid boardId, string title, int position, bool isArchived = false)
         {
             return new List
             {
                 BoardId = boardId,
                 Title = title,
                 Position = position,
-                IsArchived = false
+                IsArchived = isArchived
             };
         }
 

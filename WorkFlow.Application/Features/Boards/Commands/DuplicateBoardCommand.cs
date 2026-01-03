@@ -107,7 +107,8 @@ namespace WorkFlow.Application.Features.Boards.Commands
                 var newList = List.Create(
                     boardId: newBoard.Id,
                     title: list.Title,
-                    position: list.Position
+                    position: list.Position,
+                    isArchived: list.IsArchived
                 );
 
                 await _listRepository.AddAsync(newList);

@@ -50,13 +50,13 @@ public class BoardPermissionService : IBoardPermissionService
         if (await IsWorkspaceAdminOrOwner(board.WorkSpaceId, userId))
             return;
 
+        if (board.Visibility == VisibilityBoard.Public)
+            return;
+
         await _workspacePermission.EnsureMemberAsync(board.WorkSpaceId, userId);
 
-        if (board.Visibility == VisibilityBoard.Public ||
-            board.Visibility == VisibilityBoard.Protected)
-        {
+        if (board.Visibility == VisibilityBoard.Protected)
             return;
-        }
 
         var role = await GetRoleAsync(boardId, userId);
 
@@ -72,6 +72,9 @@ public class BoardPermissionService : IBoardPermissionService
         if (await IsWorkspaceAdminOrOwner(board.WorkSpaceId, userId))
             return;
 
+        if (board.Visibility == VisibilityBoard.Public)
+            return;
+
         await _workspacePermission.EnsureMemberAsync(board.WorkSpaceId, userId);
 
         var role = await GetRoleAsync(boardId, userId);
@@ -79,6 +82,7 @@ public class BoardPermissionService : IBoardPermissionService
         if (role is null or BoardRole.Viewer)
             throw new ForbiddenAccessException("Bạn không có quyền chỉnh sửa Board.");
     }
+
 
     public async Task EnsureOwnerAsync(Guid boardId, Guid userId)
     {
