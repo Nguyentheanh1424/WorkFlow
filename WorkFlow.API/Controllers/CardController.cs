@@ -60,7 +60,7 @@ namespace WorkFlow.API.Controllers
         }
 
         [HttpPut("{cardId:guid}/Status")]
-        [SwaggerOperation(Summary = "Cập nhật tiêu đề Card")]
+        [SwaggerOperation(Summary = "Cập nhật trạng thái Card")]
         public async Task<IActionResult> UpdateStatus(Guid cardId, [FromBody] JobStatus status)
         {
             var result = await _mediator.Send(new UpdateCardStatusCommand(cardId, status));
