@@ -99,7 +99,9 @@ namespace WorkFlow.Application.Features.Boards.Queries
                      b.Description.ToLower().Contains(keyword)));
             }
 
-            query = await ApplyVisibilityFilterAsync(query, userId);
+            var visibleBoards = await ApplyVisibilityFilterAsync(query, userId);
+
+            var filteredBoards = visibleBoards.AsQueryable();
 
             if (request.Visibility.HasValue)
             {
@@ -140,36 +142,38 @@ namespace WorkFlow.Application.Features.Boards.Queries
         }
 
 
-        private async Task<IQueryable<Board>> ApplyVisibilityFilterAsync(
+        private async Task<List<Board>> ApplyVisibilityFilterAsync(
             IQueryable<Board> query,
             Guid userId)
         {
-            var publicAndProtected = query.Where(b =>
-                b.Visibility == VisibilityBoard.Public ||
-                b.Visibility == VisibilityBoard.Protected);
+            var boards = query.ToList();
 
-            var privateBoards = query
-                .Where(b => b.Visibility == VisibilityBoard.Private)
-                .ToList();
+            var result = new List<Board>();
 
-            var allowedPrivateBoards = new List<Board>();
-
-            foreach (var board in privateBoards)
+            foreach (var board in boards)
             {
-                var role = await _boardPermissionService
-                    .GetRoleAsync(board.Id, userId);
-
-                if (role != null)
+                if (board.Visibility == VisibilityBoard.Public ||
+                    board.Visibility == VisibilityBoard.Protected)
                 {
-                    allowedPrivateBoards.Add(board);
+                    result.Add(board);
+                    continue;
+                }
+
+                if (board.Visibility == VisibilityBoard.Private)
+                {
+                    var role = await _boardPermissionService
+                        .GetRoleAsync(board.Id, userId);
+
+                    if (role != null)
+                    {
+                        result.Add(board);
+                    }
                 }
             }
 
-            return publicAndProtected
-                .Concat(allowedPrivateBoards)
-                .Distinct()
-                .AsQueryable();
+            return result;
         }
+
 
         private async Task<IQueryable<Board>> ApplyRoleFilterAsync(
             IQueryable<Board> query,
