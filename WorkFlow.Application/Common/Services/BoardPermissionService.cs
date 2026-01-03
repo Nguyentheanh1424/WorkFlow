@@ -47,13 +47,19 @@ public class BoardPermissionService : IBoardPermissionService
         var board = await _boardRepository.GetByIdAsync(boardId)
             ?? throw new NotFoundException("Board không tồn tại.");
 
-        // Workspace Owner/Admin luôn pass
         if (await IsWorkspaceAdminOrOwner(board.WorkSpaceId, userId))
             return;
 
         await _workspacePermission.EnsureMemberAsync(board.WorkSpaceId, userId);
 
+        if (board.Visibility == VisibilityBoard.Public ||
+            board.Visibility == VisibilityBoard.Protected)
+        {
+            return;
+        }
+
         var role = await GetRoleAsync(boardId, userId);
+
         if (role == null)
             throw new ForbiddenAccessException("Bạn không có quyền xem Board này.");
     }
