@@ -97,9 +97,10 @@ namespace WorkFlow.Application.Features.Boards.Commands
                 return Result<BoardDto>.Success(boardDto);
             }
 
-            var sourceLists = await _listRepository.FindAsync(l => l.BoardId == sourceBoard.Id);
+            var sourceLists = await _listRepository
+                .FindAsync(l => l.BoardId == sourceBoard.Id);
 
-            var listMap = new Dictionary<Guid, Guid>(); // old => new
+            var listMap = new Dictionary<Guid, Guid>();
 
             foreach (var list in sourceLists.OrderBy(l => l.Position))
             {
@@ -113,17 +114,10 @@ namespace WorkFlow.Application.Features.Boards.Commands
                 listMap[list.Id] = newList.Id;
             }
 
-            if (!request.CopyCards)
-            {
-                await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
-                var boardDto = _mapper.Map<BoardDto>(newBoard);
-                await _realtime.SendToWorkspaceAsync(newBoard.WorkSpaceId, BoardEvents.Created, boardDto);
-
-                return Result<BoardDto>.Success(boardDto);
-            }
-
-            var sourceCards = await _cardRepository.FindAsync(c => listMap.Keys.Contains(c.ListId));
+            var sourceCards = await _cardRepository
+                .FindAsync(c => listMap.Keys.Contains(c.ListId));
 
             foreach (var card in sourceCards.OrderBy(c => c.Position))
             {
