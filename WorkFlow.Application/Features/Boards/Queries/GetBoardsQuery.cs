@@ -45,37 +45,42 @@ namespace WorkFlow.Application.Features.Boards.Queries
     }
 
     public class GetBoardsQueryHandler
-        : IRequestHandler<GetBoardsQuery, Result<List<BoardDto>>>
+    : IRequestHandler<GetBoardsQuery, Result<List<BoardDto>>>
     {
         private readonly IRepository<Board, Guid> _boardRepository;
-        private readonly IRepository<BoardMember, Guid> _boardMemberRepository;
         private readonly IWorkSpacePermissionService _workspacePermission;
+        private readonly IBoardPermissionService _boardPermissionService;
         private readonly ICurrentUserService _currentUser;
         private readonly IMapper _mapper;
 
         public GetBoardsQueryHandler(
             IUnitOfWork unitOfWork,
             IWorkSpacePermissionService workspacePermission,
+            IBoardPermissionService boardPermissionService,
             ICurrentUserService currentUser,
             IMapper mapper)
         {
             _boardRepository = unitOfWork.GetRepository<Board, Guid>();
-            _boardMemberRepository = unitOfWork.GetRepository<BoardMember, Guid>();
             _workspacePermission = workspacePermission;
+            _boardPermissionService = boardPermissionService;
             _currentUser = currentUser;
             _mapper = mapper;
         }
 
-        public async Task<Result<List<BoardDto>>> Handle(GetBoardsQuery request, CancellationToken cancellationToken)
+        public async Task<Result<List<BoardDto>>> Handle(
+            GetBoardsQuery request,
+            CancellationToken cancellationToken)
         {
-            if (_currentUser.UserId == null)
+            if (_currentUser.UserId is null)
                 return Result<List<BoardDto>>.Failure("Không xác định được người dùng.");
 
             var userId = _currentUser.UserId.Value;
 
-            await _workspacePermission.EnsureMemberAsync(request.WorkspaceId, userId);
+            await _workspacePermission.EnsureMemberAsync(
+                request.WorkspaceId,
+                userId);
 
-            var query = _boardRepository
+            IQueryable<Board> query = _boardRepository
                 .GetAll()
                 .Where(b => b.WorkSpaceId == request.WorkspaceId);
 
@@ -90,44 +95,102 @@ namespace WorkFlow.Application.Features.Boards.Queries
 
                 query = query.Where(b =>
                     b.Title.ToLower().Contains(keyword) ||
-                    (b.Description != null && b.Description.ToLower().Contains(keyword)));
+                    (b.Description != null &&
+                     b.Description.ToLower().Contains(keyword)));
             }
+
+            query = await ApplyVisibilityFilterAsync(query, userId);
 
             if (request.Visibility.HasValue)
             {
-                var vis = request.Visibility.Value;
-                query = query.Where(b => b.Visibility == vis);
+                query = query.Where(b =>
+                    b.Visibility == request.Visibility.Value);
             }
 
             if (request.Pinned.HasValue)
             {
-                query = query.Where(b => b.Pinned == request.Pinned.Value);
+                query = query.Where(b =>
+                    b.Pinned == request.Pinned.Value);
             }
 
             if (request.Role.HasValue)
             {
-                var role = request.Role.Value;
-
-                var memberList = await _boardMemberRepository.FindAsync(
-                    m => m.UserId == userId && m.Role == role
-                );
-
-                var allowedIds = memberList.Select(m => m.BoardId).ToHashSet();
-
-                query = query.Where(b => allowedIds.Contains(b.Id));
+                query = await ApplyRoleFilterAsync(
+                    query,
+                    userId,
+                    request.Role.Value);
             }
 
             query = request.Sort switch
             {
-                SortBoardsBy.Title => query.OrderBy(b => b.Title),
-                SortBoardsBy.UpdatedAt => query.OrderByDescending(b => b.UpdatedAt),
-                _ => query.OrderByDescending(b => b.CreatedAt)
+                SortBoardsBy.Title =>
+                    query.OrderBy(b => b.Title),
+
+                SortBoardsBy.UpdatedAt =>
+                    query.OrderByDescending(b => b.UpdatedAt),
+
+                _ =>
+                    query.OrderByDescending(b => b.CreatedAt)
             };
 
             var boards = query.ToList();
-            var resultDto = _mapper.Map<List<BoardDto>>(boards);
+            var result = _mapper.Map<List<BoardDto>>(boards);
 
-            return Result<List<BoardDto>>.Success(resultDto);
+            return Result<List<BoardDto>>.Success(result);
+        }
+
+
+        private async Task<IQueryable<Board>> ApplyVisibilityFilterAsync(
+            IQueryable<Board> query,
+            Guid userId)
+        {
+            var publicAndProtected = query.Where(b =>
+                b.Visibility == VisibilityBoard.Public ||
+                b.Visibility == VisibilityBoard.Protected);
+
+            var privateBoards = query
+                .Where(b => b.Visibility == VisibilityBoard.Private)
+                .ToList();
+
+            var allowedPrivateBoards = new List<Board>();
+
+            foreach (var board in privateBoards)
+            {
+                var role = await _boardPermissionService
+                    .GetRoleAsync(board.Id, userId);
+
+                if (role != null)
+                {
+                    allowedPrivateBoards.Add(board);
+                }
+            }
+
+            return publicAndProtected
+                .Concat(allowedPrivateBoards)
+                .Distinct()
+                .AsQueryable();
+        }
+
+        private async Task<IQueryable<Board>> ApplyRoleFilterAsync(
+            IQueryable<Board> query,
+            Guid userId,
+            BoardRole role)
+        {
+            var boards = query.ToList();
+            var result = new List<Board>();
+
+            foreach (var board in boards)
+            {
+                var userRole = await _boardPermissionService
+                    .GetRoleAsync(board.Id, userId);
+
+                if (userRole == role)
+                {
+                    result.Add(board);
+                }
+            }
+
+            return result.AsQueryable();
         }
     }
 }
