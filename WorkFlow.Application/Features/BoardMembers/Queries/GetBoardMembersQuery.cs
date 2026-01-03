@@ -56,6 +56,7 @@ namespace WorkFlow.Application.Features.BoardMembers.Queries
                 {
                     UserId = m.UserId,
                     Name = user?.Name ?? string.Empty,
+                    AvatarUrl = user?.AvatarUrl ?? string.Empty,
                     Role = m.Role,
                     JoinedAt = m.JoinedAt
                 };

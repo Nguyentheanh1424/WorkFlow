@@ -110,8 +110,12 @@ namespace WorkFlow.Application.Features.Boards.Queries
             var currentRole = await _permission.GetRoleAsync(board.Id, userId)
                 ?? BoardRole.Viewer;
 
+            var owner = await _userRepository.GetByIdAsync(board.OwnerId);
+
             var dto = new BoardFullDetailDto
             {
+                OwnerName = owner?.Name ?? "Unknown",
+                OwnerAvatarUrl = owner?.AvatarUrl ?? string.Empty,
                 Board = _mapper.Map<BoardDto>(board),
                 Lists = _mapper.Map<List<ListDto>>(lists),
                 Cards = _mapper.Map<List<CardDto>>(cards),

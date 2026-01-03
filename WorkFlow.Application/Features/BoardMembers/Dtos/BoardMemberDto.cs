@@ -6,6 +6,7 @@ namespace WorkFlow.Application.Features.BoardMembers.Dtos
     {
         public Guid UserId { get; set; }
         public string Name { get; set; } = string.Empty;
+        public string AvatarUrl { get; set; } = string.Empty;
         public BoardRole? Role { get; set; }
         public DateTime JoinedAt { get; set; }
     }
