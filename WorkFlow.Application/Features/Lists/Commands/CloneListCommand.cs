@@ -119,46 +119,71 @@ namespace WorkFlow.Application.Features.Lists.Commands
                 newCard.SetStartDate(card.StartDate);
                 newCard.SetDueDate(card.DueDate);
 
-                if (card.ReminderEnabled && card.ReminderBeforeMinutes != null)
+                if (card.ReminderEnabled && card.ReminderBeforeMinutes.HasValue)
                     newCard.EnableReminder(card.ReminderBeforeMinutes.Value);
 
                 await _cardRepository.AddAsync(newCard);
 
+                await _unitOfWork.SaveChangesAsync();decimal
+
+                var cardAssignees = await _cardAssigneeRepository
+                    .FindAsync(a => a.CardId == card.Id);
+
+                foreach (var ca in cardAssignees)
+                {
+                    if (memberIds.Contains(ca.UserId))
+                    {
+                        var newCa = CardAssignee.Create(newCard.Id, ca.UserId);
+                        await _cardAssigneeRepository.AddAsync(newCa);
+                    }
+                }
+
                 var tasks = await _taskRepository.FindAsync(t => t.CardId == card.Id);
 
-                foreach (var task in tasks)
+                foreach (var task in tasks.OrderBy(t => t.Position))
                 {
-                    var newTask = Domain.Entities.Task.Create(newCard.Id, task.Title, task.Position);
+                    var newTask = Domain.Entities.Task.Create(
+                        newCard.Id,
+                        task.Title,
+                        task.Position
+                    );
+
                     await _taskRepository.AddAsync(newTask);
 
-                    var subs = await _subTaskRepository.FindAsync(st => st.TaskId == task.Id);
+                    await _unitOfWork.SaveChangesAsync();
 
-                    foreach (var st in subs)
+                    var subTasks = await _subTaskRepository
+                        .FindAsync(st => st.TaskId == task.Id);
+
+                    foreach (var st in subTasks.OrderBy(st => st.Position))
                     {
-                        var newSt = SubTask.Create(newTask.Id, st.Title, st.Position);
-                        newSt.UpdateStatus(st.Status);
-                        newSt.SetDueDate(st.DueDate);
+                        var newSubTask = SubTask.Create(
+                            newTask.Id,
+                            st.Title,
+                            st.Position
+                        );
 
-                        await _subTaskRepository.AddAsync(newSt);
+                        newSubTask.UpdateStatus(st.Status);
+                        newSubTask.SetDueDate(st.DueDate);
 
-                        var stAssignees = await _subTaskAssigneeRepository.FindAsync(a => a.SubTaskId == st.Id);
+                        await _subTaskRepository.AddAsync(newSubTask);
+
+                        await _unitOfWork.SaveChangesAsync();
+
+                        var stAssignees = await _subTaskAssigneeRepository
+                            .FindAsync(a => a.SubTaskId == st.Id);
+
                         foreach (var sa in stAssignees)
                         {
                             if (memberIds.Contains(sa.UserId))
                             {
-                                var newSa = SubTaskAssignee.Create(newSt.Id, sa.UserId);
+                                var newSa = SubTaskAssignee.Create(
+                                    newSubTask.Id,
+                                    sa.UserId
+                                );
+
                                 await _subTaskAssigneeRepository.AddAsync(newSa);
                             }
-                        }
-                    }
-
-                    var taskAssignees = await _cardAssigneeRepository.FindAsync(a => a.CardId == card.Id);
-                    foreach (var ta in taskAssignees)
-                    {
-                        if (memberIds.Contains(ta.UserId))
-                        {
-                            var newTa = CardAssignee.Create(newCard.Id, ta.UserId);
-                            await _cardAssigneeRepository.AddAsync(newTa);
                         }
                     }
                 }
