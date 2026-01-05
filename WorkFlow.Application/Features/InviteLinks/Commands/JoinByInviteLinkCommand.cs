@@ -153,7 +153,15 @@ namespace WorkFlow.Application.Features.InviteLinks.Commands
             );
 
             if (!inWorkspace)
-                return Result.Failure("Bạn phải là thành viên Workspace trước khi tham gia Board.");
+            {
+                var workspaceMember = WorkspaceMember.Create(
+                    board.WorkSpaceId,
+                    userId,
+                    WorkSpaceRole.Member
+                );
+
+                await _workspaceMemberRepository.AddAsync(workspaceMember);
+            }
 
             var inBoard = await _boardMemberRepository.AnyAsync(
                 x => x.BoardId == board.Id && x.UserId == userId
@@ -162,13 +170,14 @@ namespace WorkFlow.Application.Features.InviteLinks.Commands
             if (inBoard)
                 return Result.Failure("Bạn đã là thành viên của Board.");
 
-            var member = BoardMember.Create(
+            var boardMember = BoardMember.Create(
                 board.Id,
                 userId,
                 BoardRole.Viewer
             );
 
-            await _boardMemberRepository.AddAsync(member);
+            await _boardMemberRepository.AddAsync(boardMember);
+
             await _unitOfWork.SaveChangesAsync();
 
             return Result.Success("Tham gia Board thành công.");
