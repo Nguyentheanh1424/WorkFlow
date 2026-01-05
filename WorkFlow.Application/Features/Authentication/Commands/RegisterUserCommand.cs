@@ -84,12 +84,12 @@ namespace WorkFlow.Application.Features.Authentication.Commands
 
             await _otpService.MarkOtpSentAsync(email);
 
-            //Console.WriteLine("OTP Code: " + otp);
-            await _emailService.SendAsync(
-                email,
-                "Xác thực tài khoản",
-                $"<p>Mã OTP của bạn là: <strong>{otp}</strong></p>"
-            );
+            Console.WriteLine("OTP Code: " + otp);
+            //await _emailService.SendAsync(
+            //    email,
+            //    "Xác thực tài khoản",
+            //    $"<p>Mã OTP của bạn là: <strong>{otp}</strong></p>"
+            //);
 
             return Result.Success("Đăng ký thành công. Vui lòng kiểm tra email để xác thực OTP.");
         }
