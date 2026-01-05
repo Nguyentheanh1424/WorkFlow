@@ -10,11 +10,13 @@ namespace WorkFlow.Infrastructure.Services
         private readonly IRepository<Board, Guid> _boardRepository;
         private readonly IRepository<BoardMember, Guid> _boardMemberRepository;
         private readonly IRepository<WorkSpace, Guid> _workSpaceRepository;
+        private readonly IRepository<WorkspaceMember, Guid> _workSpaceMemberRepository;
 
         public HubPermissionService(IUnitOfWork uow)
         {
             _boardRepository = uow.GetRepository<Board, Guid>();
             _workSpaceRepository = uow.GetRepository<WorkSpace, Guid>();
+            _workSpaceMemberRepository = uow.GetRepository<WorkspaceMember, Guid>();
             _boardMemberRepository = uow.GetRepository<BoardMember, Guid>();
         }
 
@@ -35,15 +37,23 @@ namespace WorkFlow.Infrastructure.Services
             return isMember;
         }
 
-        public async Task<bool> CanAccessWorkspaceAsync(Guid userId, Guid workspaceId, CancellationToken cancellationToken = default)
+        public async Task<bool> CanAccessWorkspaceAsync(
+            Guid userId,
+            Guid workspaceId,
+            CancellationToken cancellationToken = default)
         {
             var ws = await _workSpaceRepository.FirstOrDefaultAsync(x => x.Id == workspaceId);
+
             if (ws == null) return false;
 
-            // Owner = createdBy
             if (ws.CreatedBy == userId) return true;
 
-            return false;
+            var isMember = await _workSpaceMemberRepository.AnyAsync(
+                x => x.Id == workspaceId && x.UserId == userId
+            );
+
+            return isMember;
         }
+
     }
 }
