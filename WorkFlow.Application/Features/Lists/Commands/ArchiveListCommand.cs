@@ -79,7 +79,7 @@ namespace WorkFlow.Application.Features.Lists.Commands
 
             for (int i = 0; i < orderedLists.Count; i++)
             {
-                orderedLists[i].Position = i + 1;
+                orderedLists[i].Position = i;
             }
 
             await _unitOfWork.SaveChangesAsync();
