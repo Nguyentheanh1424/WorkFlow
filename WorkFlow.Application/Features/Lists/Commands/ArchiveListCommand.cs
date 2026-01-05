@@ -71,7 +71,7 @@ namespace WorkFlow.Application.Features.Lists.Commands
 
             var activeLists = await _listRepository.FindAsync(x =>
                 x.BoardId == list.BoardId &&
-                !x.IsArchived);
+                !x.IsArchived && x.Id != list.Id);
 
             var orderedLists = activeLists
                 .OrderBy(x => x.Position)
