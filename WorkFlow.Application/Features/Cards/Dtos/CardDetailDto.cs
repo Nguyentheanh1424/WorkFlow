@@ -3,6 +3,7 @@ using WorkFlow.Application.Features.Attachments.Dtos;
 using WorkFlow.Application.Features.CardAssignees.Dtos;
 using WorkFlow.Application.Features.Tasks.Dtos;
 using WorkFlow.Domain.Entities;
+using WorkFlow.Domain.Enums;
 
 namespace WorkFlow.Application.Features.Cards.Dtos
 {
@@ -12,6 +13,8 @@ namespace WorkFlow.Application.Features.Cards.Dtos
         public Guid ListId { get; set; }
         public string Title { get; set; } = "";
         public string? Description { get; set; }
+
+        public JobStatus Status { get; set; }
         public int Position { get; set; }
 
         public int[]? Label { get; set; }
