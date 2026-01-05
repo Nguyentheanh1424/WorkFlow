@@ -49,11 +49,10 @@ namespace WorkFlow.Infrastructure.Services
             if (ws.CreatedBy == userId) return true;
 
             var isMember = await _workSpaceMemberRepository.AnyAsync(
-                x => x.Id == workspaceId && x.UserId == userId
+                x => x.WorkSpaceId == workspaceId && x.UserId == userId
             );
 
             return isMember;
         }
-
     }
 }
