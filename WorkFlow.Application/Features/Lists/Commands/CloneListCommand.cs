@@ -124,7 +124,7 @@ namespace WorkFlow.Application.Features.Lists.Commands
 
                 await _cardRepository.AddAsync(newCard);
 
-                await _unitOfWork.SaveChangesAsync();decimal
+                await _unitOfWork.SaveChangesAsync();
 
                 var cardAssignees = await _cardAssigneeRepository
                     .FindAsync(a => a.CardId == card.Id);
