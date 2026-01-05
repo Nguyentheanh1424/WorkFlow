@@ -67,17 +67,31 @@ namespace WorkFlow.Application.Features.Lists.Commands
 
             await _permission.EnsureEditorAsync(board.Id, userId);
 
-            list.Unarchive();
+            var activeLists = await _listRepository.FindAsync(x =>
+                x.BoardId == list.BoardId &&
+                !x.IsArchived);
 
-            await _listRepository.UpdateAsync(list);
+            var lastPosition = activeLists.Any()
+                ? activeLists.Max(x => x.Position)
+                : 0;
+
+            list.Unarchive();
+            list.Position = lastPosition + 1;
+
             await _unitOfWork.SaveChangesAsync();
 
             var dto = _mapper.Map<ListDto>(list);
 
-            await _realtime.SendToBoardAsync(board.Id, "BoardNotification", new { Action = ListEvents.Unarchived, Data = dto });
+            await _realtime.SendToBoardAsync(
+                board.Id,
+                "BoardNotification",
+                new
+                {
+                    Action = ListEvents.Unarchived,
+                    Data = dto
+                });
 
             return Result<ListDto>.Success(dto);
         }
     }
-
 }

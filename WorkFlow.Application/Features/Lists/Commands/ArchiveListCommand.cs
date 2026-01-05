@@ -69,12 +69,31 @@ namespace WorkFlow.Application.Features.Lists.Commands
 
             list.Archive();
 
-            await _listRepository.UpdateAsync(list);
+            var activeLists = await _listRepository.FindAsync(x =>
+                x.BoardId == list.BoardId &&
+                !x.IsArchived);
+
+            var orderedLists = activeLists
+                .OrderBy(x => x.Position)
+                .ToList();
+
+            for (int i = 0; i < orderedLists.Count; i++)
+            {
+                orderedLists[i].Position = i + 1;
+            }
+
             await _unitOfWork.SaveChangesAsync();
 
             var dto = _mapper.Map<ListDto>(list);
 
-            await _realtime.SendToBoardAsync(board.Id, "BoardNotification", new { Action = ListEvents.Archived, Data = dto });
+            await _realtime.SendToBoardAsync(
+                board.Id,
+                "BoardNotification",
+                new
+                {
+                    Action = ListEvents.Archived,
+                    Data = dto
+                });
 
             return Result<ListDto>.Success(dto);
         }
