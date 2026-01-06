@@ -76,7 +76,11 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // SignalR
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(option =>
+{
+    option.KeepAliveInterval = TimeSpan.FromSeconds(15);
+    option.ClientTimeoutInterval = TimeSpan.FromSeconds(60);
+});
 
 // JWT
 var jwtConfig = builder.Configuration.GetSection("Jwt");
