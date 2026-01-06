@@ -19,6 +19,7 @@ builder.Services.AddHttpContextAccessor();
 // Application + Infrastructure
 builder.Services.AddApplication();
 builder.Services.AddScoped<IRealtimeService, RealtimeService>();
+builder.Services.AddHostedService<CallApiBackgroundService>();
 builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddControllers()
