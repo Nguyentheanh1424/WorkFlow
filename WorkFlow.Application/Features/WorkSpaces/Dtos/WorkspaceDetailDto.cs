@@ -1,8 +1,10 @@
-﻿using WorkFlow.Domain.Enums;
+﻿using WorkFlow.Application.Common.Mappings;
+using WorkFlow.Domain.Entities;
+using WorkFlow.Domain.Enums;
 
 namespace WorkFlow.Application.Features.WorkSpaces.Dtos
 {
-    public class WorkSpaceDetailDto
+    public class WorkSpaceDetailDto : IMapFrom<WorkSpace>
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = "";
