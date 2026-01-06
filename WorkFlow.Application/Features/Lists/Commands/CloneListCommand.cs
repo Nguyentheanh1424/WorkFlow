@@ -88,6 +88,7 @@ namespace WorkFlow.Application.Features.Lists.Commands
 
             var newList = List.Create(board.Id, sourceList.Title, newPosition);
             await _listRepository.AddAsync(newList);
+            await _unitOfWork.SaveChangesAsync();
 
             if (!request.CopyCards)
             {
